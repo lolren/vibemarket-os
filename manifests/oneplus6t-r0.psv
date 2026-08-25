@@ -7,7 +7,7 @@ channel|development
 component|postmarketOS-pmaports|https://gitlab.postmarketos.org/postmarketOS/pmaports.git|073ff887b0e18c4c80bd94098fda035e0e20d28b|source-only
 component|pmbootstrap|https://gitlab.postmarketOS.org/postmarketOS/pmbootstrap.git|c5b2a8884aba8251b2452caa527d2839bbf14feb|source-only
 component|oneplus6t-pmos-fixes|https://github.com/lolren/oneplus6t-pmos-fixes.git|a6c46974fd9320a3e70ae372d8902495df775497|source-and-device-tools
-component|advanced-snapshot|https://github.com/lolren/advanced-snapshot.git|d012a5149e69fb37bd619220d7deac8cf0881280|source-and-app
+component|advanced-snapshot|https://github.com/lolren/advanced-snapshot.git|d1c971484870dc3619d692cbac139b8f2e8d81cf|source-and-app
 policy|ordinary-upgrade|pmos-safe-upgrade-simulation-required
 policy|camera-critical|manifest-generation-and-sensor-health-required
 policy|waydroid|rootfs-mounts-zero-and-io-pressure-clear-required

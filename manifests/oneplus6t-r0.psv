@@ -6,7 +6,7 @@ compatible|oneplus,fajita
 channel|development
 component|postmarketOS-pmaports|https://gitlab.postmarketos.org/postmarketOS/pmaports.git|073ff887b0e18c4c80bd94098fda035e0e20d28b|source-only
 component|pmbootstrap|https://gitlab.postmarketOS.org/postmarketOS/pmbootstrap.git|c5b2a8884aba8251b2452caa527d2839bbf14feb|source-only
-component|oneplus6t-pmos-fixes|https://github.com/lolren/oneplus6t-pmos-fixes.git|b76499765c7f1faffdb68d5b1c87dfba66d9d0d2|source-and-device-tools
+component|oneplus6t-pmos-fixes|https://github.com/lolren/oneplus6t-pmos-fixes.git|9d3859b0419e7f21d64f14bc08489b6162f5b2f1|source-and-device-tools
 component|advanced-snapshot|https://github.com/lolren/advanced-snapshot.git|d66f853c26319af8fc0f76528446b0176108a3ed|source-and-app
 policy|ordinary-upgrade|pmos-safe-upgrade-simulation-required
 policy|camera-critical|manifest-generation-and-sensor-health-required

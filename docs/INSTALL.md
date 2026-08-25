@@ -1,0 +1,44 @@
+# Installing the product layer
+
+This repository is an orchestration and reproducibility layer. It does not
+flash a boot image, unlock a bootloader or write firmware. The target must
+already boot postmarketOS and expose the normal user SSH/session tools.
+
+## Requirements
+
+- OnePlus 6T with `/proc/device-tree/compatible` containing `oneplus,fajita`;
+- postmarketOS package tools and the `oneplus6t-pmos-fixes` helpers;
+- an exact, verified camera-generation stage when installing native camera
+  packages;
+- an exact, verified Waydroid camera stage when installing the Android lower
+  layer; and
+- a clean Waydroid preflight before any overlay access.
+
+## Check first
+
+```sh
+./scripts/vibe-check --require-device
+./scripts/vibe-check --require-device --require-clean-waydroid
+```
+
+The first command checks the manifest and device identity. The second also
+requires the read-only Waydroid mount/I/O gate. Both commands are safe to run
+while the phone is in normal use.
+
+## Simulate, then apply
+
+```sh
+./scripts/vibe-install \
+  --camera-stage /absolute/path/to/camera-generation \
+  --waydroid-stage /absolute/path/to/waydroid-camera-stage
+```
+
+Review the simulation and its evidence directory. Close camera applications,
+stop the Waydroid session/container, and repeat with `--apply` only after the
+simulation and preflight are clean. Native package changes use
+`manage-camera-generation`; the Waydroid files use
+`install-waydroid-camera`. Their backup, signature, mount and rollback rules
+remain authoritative.
+
+The product installer never performs a reboot. Reboot persistence is a
+separate acceptance test after the phone is stable.

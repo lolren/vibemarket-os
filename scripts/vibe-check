@@ -1,0 +1,166 @@
+#!/bin/sh
+set -eu
+
+PROGRAM=${0##*/}
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+manifest=$script_dir/../manifests/oneplus6t-r0.psv
+compatible_file=${VIBEMARKET_COMPATIBLE_FILE:-/proc/device-tree/compatible}
+health_command=${VIBEMARKET_WAYDROID_HEALTH_COMMAND:-pmos-check-waydroid-health}
+require_device=no
+require_clean=no
+output=${VIBEMARKET_CHECK_OUTPUT:-}
+
+usage() {
+	cat <<EOF
+Usage: $PROGRAM [options]
+
+Validate a VibeMarketOS source manifest and, when running on a phone, check
+the OnePlus compatible string and optional Waydroid safety report.
+
+Options:
+  --manifest FILE          manifest to validate
+  --compatible-file FILE   device-tree compatible fixture or target file
+  --require-device         fail when the target device cannot be verified
+  --require-clean-waydroid require rootfs_mounts=0 and overlay_precondition=pass
+  --output FILE             refuse to overwrite and write the report there
+  -h, --help                show this help
+
+The check is read-only. It does not install packages, stop services, access an
+overlay, unmount filesystems or reboot.
+EOF
+}
+
+die() {
+	printf '%s: %s\n' "$PROGRAM" "$*"
+	exit 1
+}
+
+while [ "$#" -gt 0 ]; do
+	case "$1" in
+	--manifest)
+		[ "$#" -ge 2 ] || die '--manifest requires a file'
+		manifest=$2
+		shift 2
+		;;
+	--compatible-file)
+		[ "$#" -ge 2 ] || die '--compatible-file requires a file'
+		compatible_file=$2
+		shift 2
+		;;
+	--require-device)
+		require_device=yes
+		shift
+		;;
+	--require-clean-waydroid)
+		require_clean=yes
+		require_device=yes
+		shift
+		;;
+	--output)
+		[ "$#" -ge 2 ] || die '--output requires a file'
+		output=$2
+		shift 2
+		;;
+	-h|--help)
+		usage
+		exit 0
+		;;
+	*)
+		usage >&2
+		die "unknown argument: $1"
+		;;
+	esac
+done
+
+[ -r "$manifest" ] || die "manifest is not readable: $manifest"
+for command in awk grep sha256sum tr; do
+	command -v "$command" >/dev/null 2>&1 || die "missing command: $command"
+done
+
+if [ -n "$output" ]; then
+	[ ! -e "$output" ] || die "refusing to overwrite: $output"
+	mkdir -p "$(dirname -- "$output")"
+	exec >"$output"
+fi
+
+manifest_value() {
+	key=$1
+	awk -F '|' -v key="$key" \
+		'$1 == key { value=$2; count++ }
+		END { if (count == 1) print value; else exit 1 }' "$manifest"
+}
+
+schema=$(manifest_value schema) || die 'manifest needs one schema row'
+[ "$schema" = 1 ] || die "unsupported manifest schema: $schema"
+product=$(manifest_value product) || die 'manifest needs one product row'
+[ "$product" = VibeMarketOS ] || die "unexpected product: $product"
+release=$(manifest_value release) || die 'manifest needs one release row'
+device=$(manifest_value device) || die 'manifest needs one device row'
+wanted_compatible=$(manifest_value compatible) || die 'manifest needs one compatible row'
+
+component_count=$(awk -F '|' '$1 == "component" { count++ } END { print count + 0 }' "$manifest")
+[ "$component_count" -ge 1 ] || die 'manifest has no components'
+component_rows=$(awk -F '|' '$1 == "component" { print }' "$manifest")
+while IFS='|' read -r kind name url revision role; do
+	[ "$kind" = component ] || continue
+	case "$name" in ''|*'|'*|*' '*) die "invalid component name: $name" ;; esac
+	case "$url" in http://*|https://*) ;; *) die "invalid component URL: $url" ;; esac
+	printf '%s\n' "$revision" | grep -Eq '^[0-9a-f]{40}$' || \
+		die "component revision is not a full commit: $name"
+	[ -n "$role" ] || die "component role is empty: $name"
+done <<EOF
+$component_rows
+EOF
+
+policy_count=$(awk -F '|' '$1 == "policy" { count++ } END { print count + 0 }' "$manifest")
+[ "$policy_count" -ge 1 ] || die 'manifest has no update policy'
+
+printf 'report=vibemarket-manifest-check\n'
+printf 'product=%s\n' "$product"
+printf 'release=%s\n' "$release"
+printf 'device=%s\n' "$device"
+printf 'compatible_required=%s\n' "$wanted_compatible"
+printf 'components=%s\n' "$component_count"
+printf 'manifest_sha256=%s\n' "$(sha256sum "$manifest" | awk '{ print $1 }')"
+
+device_result=unavailable
+if [ -r "$compatible_file" ]; then
+	if tr '\000' '\n' <"$compatible_file" | grep -Fxq "$wanted_compatible"; then
+		device_result=pass
+	else
+		device_result=fail
+	fi
+fi
+printf 'device_compatibility=%s\n' "$device_result"
+if [ "$device_result" = fail ]; then
+	die "device is not compatible with $wanted_compatible"
+fi
+if [ "$require_device" = yes ] && [ "$device_result" != pass ]; then
+	die 'device compatibility could not be verified'
+fi
+
+health_result=unavailable
+if command -v "$health_command" >/dev/null 2>&1; then
+	health_output=$("$health_command" --processes 2>&1 || true)
+	rootfs_mounts=$(printf '%s\n' "$health_output" | awk -F= '$1 == "rootfs_mounts" { print $2; exit }')
+	overlay_precondition=$(printf '%s\n' "$health_output" | awk -F= '$1 == "overlay_precondition" { print $2; exit }')
+	stale_helpers=$(printf '%s\n' "$health_output" | awk -F= '$1 == "stale_helper_count" { print $2; exit }')
+	[ -n "$rootfs_mounts" ] || rootfs_mounts=unavailable
+	[ -n "$overlay_precondition" ] || overlay_precondition=unavailable
+	[ -n "$stale_helpers" ] || stale_helpers=unavailable
+	if [ "$rootfs_mounts" = 0 ] && [ "$overlay_precondition" = pass ] && \
+		[ "$stale_helpers" = 0 ]; then
+		health_result=pass
+	else
+		health_result=blocked
+	fi
+	printf 'waydroid_rootfs_mounts=%s\n' "$rootfs_mounts"
+	printf 'waydroid_overlay_precondition=%s\n' "$overlay_precondition"
+	printf 'waydroid_stale_helpers=%s\n' "$stale_helpers"
+fi
+printf 'waydroid_health=%s\n' "$health_result"
+if [ "$require_clean" = yes ] && [ "$health_result" != pass ]; then
+	die 'Waydroid safety gate is not clean'
+fi
+
+printf '%s\n' 'result=pass'

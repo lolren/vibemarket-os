@@ -1,0 +1,126 @@
+#!/bin/sh
+set -eu
+
+PROGRAM=${0##*/}
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+manifest=$script_dir/../manifests/oneplus6t-r0.psv
+fixes_root=${VIBEMARKET_FIXES_ROOT:-}
+camera_stage=
+waydroid_stage=
+evidence=${VIBEMARKET_EVIDENCE_DIR:-}
+sudo_command=${VIBEMARKET_SUDO:-sudo}
+apply=no
+
+usage() {
+	cat <<EOF
+Usage: $PROGRAM [options]
+
+Run the reviewed component installers for a native camera generation and/or
+Waydroid camera stage. Simulation is the default.
+
+  --fixes-root DIR       checked-out oneplus6t-pmos-fixes tree
+  --camera-stage DIR     native APK generation stage
+  --waydroid-stage DIR   Waydroid camera overlay stage
+  --manifest FILE        VibeMarketOS manifest
+  --evidence DIR         evidence directory for native package simulation
+  --apply                apply after all safety checks; otherwise simulate
+  -h, --help             show this help
+
+The command never reboots or touches partitions, firmware, boot slots or the
+bootloader. Stop Waydroid and close camera clients separately before --apply.
+EOF
+}
+
+die() {
+	printf '%s: %s\n' "$PROGRAM" "$*"
+	exit 1
+}
+
+while [ "$#" -gt 0 ]; do
+	case "$1" in
+	--fixes-root)
+		[ "$#" -ge 2 ] || die '--fixes-root requires a directory'
+		fixes_root=$2
+		shift 2
+		;;
+	--camera-stage)
+		[ "$#" -ge 2 ] || die '--camera-stage requires a directory'
+		camera_stage=$2
+		shift 2
+		;;
+	--waydroid-stage)
+		[ "$#" -ge 2 ] || die '--waydroid-stage requires a directory'
+		waydroid_stage=$2
+		shift 2
+		;;
+	--manifest)
+		[ "$#" -ge 2 ] || die '--manifest requires a file'
+		manifest=$2
+		shift 2
+		;;
+	--evidence)
+		[ "$#" -ge 2 ] || die '--evidence requires a directory'
+		evidence=$2
+		shift 2
+		;;
+	--apply)
+		apply=yes
+		shift
+		;;
+	-h|--help)
+		usage
+		exit 0
+		;;
+	*)
+		usage >&2
+		die "unknown argument: $1"
+		;;
+	esac
+done
+
+[ -n "$camera_stage" ] || [ -n "$waydroid_stage" ] || \
+	die 'provide --camera-stage and/or --waydroid-stage'
+
+[ -n "$fixes_root" ] || die '--fixes-root is required for component installers'
+[ -d "$fixes_root" ] || die "fixes root is not a directory: $fixes_root"
+
+"$script_dir/vibe-check" --manifest "$manifest" --require-device
+if [ -n "$waydroid_stage" ]; then
+	"$script_dir/vibe-check" --manifest "$manifest" \
+		--require-device --require-clean-waydroid
+fi
+
+if [ -n "$camera_stage" ]; then
+	manager=$fixes_root/scripts/manage-camera-generation
+	generation_manifest=$fixes_root/data/camera-generation-r7-r4.psv
+	[ -x "$manager" ] || die "missing camera generation manager: $manager"
+	[ -r "$generation_manifest" ] || \
+		die "missing generation manifest: $generation_manifest"
+	if [ -z "$evidence" ]; then
+		evidence=$(mktemp -d "${TMPDIR:-/tmp}/vibemarket-camera.XXXXXX")
+	else
+		mkdir -p "$evidence"
+	fi
+	set -- --stage "$camera_stage" \
+		--manifest "$generation_manifest" \
+		--evidence "$evidence" install
+	if [ "$apply" = yes ]; then
+		set -- "$@" --apply
+	fi
+	"$manager" "$@"
+fi
+
+if [ -n "$waydroid_stage" ]; then
+	installer=$fixes_root/scripts/install-waydroid-camera
+	[ -x "$installer" ] || die "missing Waydroid installer: $installer"
+	if [ "$apply" = no ]; then
+		"$installer" --dry-run "$waydroid_stage"
+	elif [ "$(id -u)" -eq 0 ]; then
+		"$installer" "$waydroid_stage"
+	else
+		"$sudo_command" "$installer" "$waydroid_stage"
+	fi
+fi
+
+printf 'mode=%s\n' "$apply"
+printf '%s\n' 'result=pass'

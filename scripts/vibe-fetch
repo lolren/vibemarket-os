@@ -1,0 +1,76 @@
+#!/bin/sh
+set -eu
+
+PROGRAM=${0##*/}
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+manifest=$script_dir/../manifests/oneplus6t-r0.psv
+root=
+
+usage() {
+	cat <<EOF
+Usage: $PROGRAM --root DIRECTORY [--manifest FILE]
+
+Clone each source component from a VibeMarketOS manifest into a new or empty
+directory and check out its exact commit. Existing non-empty roots are refused.
+EOF
+}
+
+die() {
+	printf '%s: %s\n' "$PROGRAM" "$*"
+	exit 1
+}
+
+while [ "$#" -gt 0 ]; do
+	case "$1" in
+	--manifest)
+		[ "$#" -ge 2 ] || die '--manifest requires a file'
+		manifest=$2
+		shift 2
+		;;
+	--root)
+		[ "$#" -ge 2 ] || die '--root requires a directory'
+		root=$2
+		shift 2
+		;;
+	-h|--help)
+		usage
+		exit 0
+		;;
+	*)
+		usage >&2
+		die "unknown argument: $1"
+		;;
+	esac
+done
+
+[ -n "$root" ] || die '--root is required'
+[ -r "$manifest" ] || die "manifest is not readable: $manifest"
+command -v git >/dev/null 2>&1 || die 'git is required'
+command -v awk >/dev/null 2>&1 || die 'awk is required'
+command -v find >/dev/null 2>&1 || die 'find is required'
+
+if [ -e "$root" ]; then
+	[ -d "$root" ] || die "root is not a directory: $root"
+	[ -z "$(find "$root" -mindepth 1 -maxdepth 1 -print -quit)" ] || \
+		die "refusing non-empty root: $root"
+else
+	mkdir -p "$root"
+fi
+
+component_rows=$(awk -F '|' '$1 == "component" { print }' "$manifest")
+while IFS='|' read -r kind name url revision role; do
+	[ "$kind" = component ] || continue
+	destination=$root/$name
+	printf 'fetching=%s\n' "$name"
+	git clone --filter=blob:none --no-checkout "$url" "$destination"
+	git -C "$destination" checkout --detach --quiet "$revision"
+	actual=$(git -C "$destination" rev-parse HEAD)
+	[ "$actual" = "$revision" ] || die "checked out wrong revision for $name"
+	printf 'revision=%s\n' "$actual"
+done <<EOF
+$component_rows
+EOF
+
+cp "$manifest" "$root/VIBEMARKET-MANIFEST.psv"
+printf 'source_root=%s\n' "$root"
+printf '%s\n' 'result=pass'

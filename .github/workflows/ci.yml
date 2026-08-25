@@ -1,0 +1,19 @@
+name: VibeMarketOS checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  shell-and-manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check shell syntax
+        run: sh -n scripts/* tests/*.sh
+      - name: Run manifest fixture tests
+        run: |
+          ./tests/test-manifest.sh
+          ./tests/test-fetch.sh
+      - name: Validate the checked-in development manifest
+        run: ./scripts/vibe-check --manifest manifests/oneplus6t-r0.psv

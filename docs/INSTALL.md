@@ -42,3 +42,21 @@ remain authoritative.
 
 The product installer never performs a reboot. Reboot persistence is a
 separate acceptance test after the phone is stable.
+
+## Reproducible checkout requirement
+
+`vibe-install` refuses to run if `--fixes-root` is not a Git checkout of the
+`oneplus6t-pmos-fixes` revision named by the selected manifest, or if that
+checkout has tracked or untracked changes. This prevents a local script or
+generation manifest from silently bypassing the reviewed product pin.
+
+Fetch a matching source tree with:
+
+```sh
+./scripts/vibe-fetch --manifest manifests/oneplus6t-r0.psv \
+  --root /tmp/vibemarket-os-r0-sources
+```
+
+Then pass `/tmp/vibemarket-os-r0-sources/oneplus6t-pmos-fixes` as
+`--fixes-root`. If you intentionally change a component, create and review a
+new manifest revision rather than installing from a dirty checkout.

@@ -27,7 +27,9 @@ Waydroid camera stage. Simulation is the default.
   -h, --help             show this help
 
 The command never reboots or touches partitions, firmware, boot slots or the
-bootloader. Stop Waydroid and close camera clients separately before --apply.
+bootloader. The fixes checkout must be clean and exactly match the revision
+pinned by the manifest. Stop Waydroid and close camera clients separately
+before --apply.
 EOF
 }
 
@@ -83,12 +85,25 @@ done
 
 [ -n "$fixes_root" ] || die '--fixes-root is required for component installers'
 [ -d "$fixes_root" ] || die "fixes root is not a directory: $fixes_root"
+command -v git >/dev/null 2>&1 || die 'git is required to verify the fixes checkout'
 
 "$script_dir/vibe-check" --manifest "$manifest" --require-device
 if [ -n "$waydroid_stage" ]; then
 	"$script_dir/vibe-check" --manifest "$manifest" \
 		--require-device --require-clean-waydroid
 fi
+
+expected_fixes_revision=$(awk -F '|' \
+	'$1 == "component" && $2 == "oneplus6t-pmos-fixes" { value=$4; count++ }
+	END { if (count != 1) exit 1; print value }' "$manifest") || \
+	die 'manifest needs exactly one oneplus6t-pmos-fixes component'
+actual_fixes_revision=$(git -C "$fixes_root" rev-parse HEAD 2>/dev/null) || \
+	die "fixes root is not a Git checkout: $fixes_root"
+[ "$actual_fixes_revision" = "$expected_fixes_revision" ] || \
+	die "fixes checkout revision does not match manifest: expected $expected_fixes_revision, got $actual_fixes_revision"
+[ -z "$(git -C "$fixes_root" status --porcelain --untracked-files=all)" ] || \
+	die "fixes checkout is dirty; use a clean checkout of $expected_fixes_revision"
+printf 'fixes_revision=%s\n' "$actual_fixes_revision"
 
 if [ -n "$camera_stage" ]; then
 	manager=$fixes_root/scripts/manage-camera-generation

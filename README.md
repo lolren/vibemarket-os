@@ -18,7 +18,8 @@ bundle is installed or that Android camera performance is accepted.
   compatibility and optional Waydroid health gate.
 - `scripts/vibe-fetch` checks out every pinned source into a new work tree.
 - `scripts/vibe-install` composes the existing signed camera-generation and
-  Waydroid installers without bypassing their rollback and mount checks.
+  Waydroid installers without bypassing their rollback and mount checks. It
+  refuses dirty or incorrectly pinned component checkouts.
 - `docs/` explains the update boundary, recovery rules and release process.
 - `.github/workflows/` verifies shell scripts and manifest structure on every
   push.

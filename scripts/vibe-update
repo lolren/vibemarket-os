@@ -1,0 +1,106 @@
+#!/bin/sh
+set -eu
+
+PROGRAM=${0##*/}
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+manifest=$script_dir/../manifests/oneplus6t-r0.psv
+fixes_root=
+evidence=
+apply=no
+
+usage() {
+	cat <<EOF
+Usage: $PROGRAM --fixes-root DIRECTORY [options]
+
+Run the pinned postmarketOS ordinary-update guard for this product. Simulation
+is the default; the component guard refuses camera-critical package changes.
+
+  --fixes-root DIR  clean oneplus6t-pmos-fixes checkout at the pinned revision
+  --manifest FILE   VibeMarketOS manifest (default: oneplus6t-r0.psv)
+  --evidence DIR    root directory for the guard's dated evidence directory
+  --apply           apply only after the simulation passes
+  -h, --help        show this help
+
+The command never accepts arbitrary apk arguments and never reboots, changes
+partitions, touches firmware or changes the bootloader. Use the camera
+generation manager for a reviewed camera-critical update.
+EOF
+}
+
+die() {
+	printf '%s: %s\n' "$PROGRAM" "$*" >&2
+	exit 1
+}
+
+while [ "$#" -gt 0 ]; do
+	case "$1" in
+	--fixes-root)
+		[ "$#" -ge 2 ] || die '--fixes-root requires a directory'
+		fixes_root=$2
+		shift 2
+		;;
+	--manifest)
+		[ "$#" -ge 2 ] || die '--manifest requires a file'
+		manifest=$2
+		shift 2
+		;;
+	--evidence)
+		[ "$#" -ge 2 ] || die '--evidence requires a directory'
+		evidence=$2
+		shift 2
+		;;
+	--apply)
+		apply=yes
+		shift
+		;;
+	-h|--help)
+		usage
+		exit 0
+		;;
+	*)
+		usage >&2
+		die "unknown argument: $1"
+		;;
+	esac
+done
+
+[ -n "$fixes_root" ] || die '--fixes-root is required'
+[ -d "$fixes_root" ] || die "fixes root is not a directory: $fixes_root"
+[ -r "$manifest" ] || die "manifest is not readable: $manifest"
+command -v git >/dev/null 2>&1 || die 'git is required'
+
+"$script_dir/vibe-check" --manifest "$manifest" --require-device
+
+expected_revision=$(awk -F '|' \
+	'$1 == "component" && $2 == "oneplus6t-pmos-fixes" { value=$4; count++ }
+	END { if (count != 1) exit 1; print value }' "$manifest") || \
+	die 'manifest needs exactly one oneplus6t-pmos-fixes component'
+actual_revision=$(git -C "$fixes_root" rev-parse HEAD 2>/dev/null) || \
+	die "fixes root is not a Git checkout: $fixes_root"
+[ "$actual_revision" = "$expected_revision" ] || \
+	die "fixes checkout revision does not match manifest: expected $expected_revision, got $actual_revision"
+[ -z "$(git -C "$fixes_root" status --porcelain --untracked-files=all)" ] || \
+	die "fixes checkout is dirty; use a clean checkout of $expected_revision"
+
+guard=$fixes_root/scripts/pmos-safe-upgrade
+[ -x "$guard" ] || die "missing executable update guard: $guard"
+
+if [ -n "$evidence" ]; then
+	[ ! -e "$evidence" ] || [ -d "$evidence" ] || \
+		die "evidence path is not a directory: $evidence"
+	mkdir -p "$evidence"
+	PMOS_UPDATE_EVIDENCE_DIR=$evidence
+	export PMOS_UPDATE_EVIDENCE_DIR
+fi
+
+if [ "$apply" = yes ]; then
+	"$guard" --apply
+	mode=apply
+else
+	"$guard" --simulate
+	mode=simulate
+fi
+
+printf 'fixes_revision=%s\n' "$actual_revision"
+printf 'mode=%s\n' "$mode"
+printf '%s\n' 'result=pass'

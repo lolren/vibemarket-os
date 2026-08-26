@@ -20,6 +20,8 @@ bundle is installed or that Android camera performance is accepted.
 - `scripts/vibe-install` composes the existing signed camera-generation and
   Waydroid installers without bypassing their rollback and mount checks. It
   refuses dirty or incorrectly pinned component checkouts.
+- `scripts/vibe-update` verifies the pinned fixes checkout and delegates
+  ordinary upgrades to the camera-critical package guard.
 - `docs/` explains the update boundary, recovery rules and release process.
 - `.github/workflows/` verifies shell scripts and manifest structure on every
   push.
@@ -186,10 +188,20 @@ The complete implementation/device-acceptance audit is maintained in the
 
 ## Update policy
 
-Run `pmos-safe-upgrade --simulate` for ordinary postmarketOS updates. If a
-camera-critical package changes, the update must be rebuilt into a new
-manifest generation and pass the native camera, Advanced Snapshot and
-Waydroid health gates before activation. See [docs/UPDATE_POLICY.md](docs/UPDATE_POLICY.md).
+Run the product wrapper from a clean checkout of the pinned fixes revision for
+ordinary postmarketOS updates:
+
+```sh
+./scripts/vibe-update --fixes-root /tmp/vibemarket-os-r0-sources/oneplus6t-pmos-fixes
+./scripts/vibe-update --fixes-root /tmp/vibemarket-os-r0-sources/oneplus6t-pmos-fixes \
+  --apply
+```
+
+The first command is simulation-only. It delegates to `pmos-safe-upgrade`,
+which refuses camera-critical package changes; those must be rebuilt into a
+new manifest generation and pass the native camera, Advanced Snapshot and
+Waydroid health gates before activation. See
+[docs/UPDATE_POLICY.md](docs/UPDATE_POLICY.md).
 
 ## Current status
 

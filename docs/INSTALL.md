@@ -71,6 +71,22 @@ anything or reboot.
 The product installer never performs a reboot. Reboot persistence is a
 separate acceptance test after the phone is stable.
 
+## Ordinary postmarketOS updates
+
+Use `vibe-update` so the product manifest and the pinned fixes checkout are
+verified before the component update guard is called:
+
+```sh
+./scripts/vibe-update \
+  --fixes-root /tmp/vibemarket-os-r0-sources/oneplus6t-pmos-fixes
+```
+
+Review the guard's simulation and then repeat with `--apply` only when it lists
+no camera-critical package. `vibe-update` does not accept arbitrary `apk`
+arguments and does not reboot. A transaction that changes libcamera, PipeWire,
+WirePlumber, Snapshot, Advanced Snapshot or the OnePlus kernel is intentionally
+refused and must use a new signed camera generation instead.
+
 ## Reproducible checkout requirement
 
 `vibe-install` refuses to run if `--fixes-root` is not a Git checkout of the

@@ -6,11 +6,22 @@ around the OnePlus camera, Waydroid lower layer and Advanced Snapshot.
 
 ## Ordinary updates
 
-Use the installed `pmos-safe-upgrade` helper:
+Use the product wrapper from a clean checkout of the exact fixes revision:
 
 ```sh
-pmos-safe-upgrade --simulate
-pmos-safe-upgrade --apply
+./scripts/vibe-update \
+  --fixes-root /tmp/vibemarket-os-r0-sources/oneplus6t-pmos-fixes
+```
+
+It verifies the device compatibility string, manifest and fixes checkout, then
+delegates to the installed `pmos-safe-upgrade` helper. The first invocation is
+simulation-only. Repeat it with `--apply` only after reviewing the operation
+list:
+
+```sh
+./scripts/vibe-update \
+  --fixes-root /tmp/vibemarket-os-r0-sources/oneplus6t-pmos-fixes \
+  --apply
 ```
 
 Simulation is the default and must be reviewed first. An ordinary transaction
@@ -22,6 +33,11 @@ camera-critical package.
 The wrapper and the generation manager force `LC_ALL=C` while parsing APK
 operation lines. This keeps the safety decision independent of the login
 user's translation settings.
+
+`vibe-update` refuses a dirty or incorrectly pinned fixes checkout and accepts
+no arbitrary APK arguments. It never reboots or changes partitions. Its
+`--evidence` option is passed to the component guard as the root for the dated
+simulation/transaction evidence directory.
 
 ## Camera generations
 

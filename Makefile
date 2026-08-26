@@ -6,4 +6,5 @@ test:
 	./tests/test-fetch.sh
 	./tests/test-artifact-fetch.sh
 	./tests/test-install.sh
+	./tests/test-update.sh
 	./scripts/vibe-check --manifest manifests/oneplus6t-r0.psv

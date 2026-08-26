@@ -17,7 +17,7 @@ git -C "$fixes_root" config user.name test
 printf '%s\n' '#!/bin/sh' 'printf "%s\\n" manager_called=yes' \
 	'printf "%s\\n" result=pass' >"$fixes_root/scripts/manage-camera-generation"
 chmod +x "$fixes_root/scripts/manage-camera-generation"
-touch "$fixes_root/data/camera-generation-r7-r4.psv"
+touch "$fixes_root/data/camera-generation-r7-r5.psv"
 git -C "$fixes_root" add scripts data
 git -C "$fixes_root" commit --quiet -m initial
 revision=$(git -C "$fixes_root" rev-parse HEAD)
@@ -42,7 +42,7 @@ grep -Fqx "fixes_revision=$revision" "$TEST_DIR/pass-report"
 grep -Fqx 'manager_called=yes' "$TEST_DIR/pass-report"
 grep -Fqx 'result=pass' "$TEST_DIR/pass-report"
 
-printf '%s\n' dirty >>"$fixes_root/data/camera-generation-r7-r4.psv"
+printf '%s\n' dirty >>"$fixes_root/data/camera-generation-r7-r5.psv"
 if env $common_env "$INSTALL" --manifest "$manifest" \
 	--fixes-root "$fixes_root" --camera-stage "$TEST_DIR/camera-stage" \
 	--evidence "$TEST_DIR/dirty-evidence" >"$TEST_DIR/dirty-report" 2>&1; then
@@ -51,7 +51,7 @@ if env $common_env "$INSTALL" --manifest "$manifest" \
 fi
 grep -Fq 'fixes checkout is dirty' "$TEST_DIR/dirty-report"
 
-git -C "$fixes_root" add data/camera-generation-r7-r4.psv
+git -C "$fixes_root" add data/camera-generation-r7-r5.psv
 git -C "$fixes_root" commit --quiet -m dirty
 if env $common_env "$INSTALL" --manifest "$manifest" \
 	--fixes-root "$fixes_root" --camera-stage "$TEST_DIR/camera-stage" \

@@ -107,7 +107,7 @@ printf 'fixes_revision=%s\n' "$actual_fixes_revision"
 
 if [ -n "$camera_stage" ]; then
 	manager=$fixes_root/scripts/manage-camera-generation
-	generation_manifest=$fixes_root/data/camera-generation-r7-r4.psv
+	generation_manifest=$fixes_root/data/camera-generation-r7-r5.psv
 	[ -x "$manager" ] || die "missing camera generation manager: $manager"
 	[ -r "$generation_manifest" ] || \
 		die "missing generation manifest: $generation_manifest"

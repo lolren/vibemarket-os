@@ -76,6 +76,11 @@ does not touch partitions, boot slots, firmware or the bootloader. A Waydroid
 overlay operation is refused while any rootfs mount or blocking I/O pressure
 is present.
 
+The current manifest pins the native camera generation to PipeWire r7 with
+Advanced Snapshot r7 and the manifest-verified r7/r4 rollback. The exact
+package hashes, signing key and offline repository indexes are maintained in
+the pinned `oneplus6t-pmos-fixes` checkout.
+
 Optional Play Store/GAPPS setup is intentionally separate from the product
 installer because it changes the Waydroid system image. Follow the
 [component procedure](https://github.com/lolren/oneplus6t-pmos-fixes/blob/main/docs/WAYDROID-GAPPS.md),

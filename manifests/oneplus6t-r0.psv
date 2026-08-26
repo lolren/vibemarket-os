@@ -4,7 +4,7 @@ release|0.1.0-dev
 device|oneplus-fajita
 compatible|oneplus,fajita
 channel|development
-component|postmarketOS-pmaports|https://gitlab.postmarketos.org/postmarketOS/pmaports.git|073ff887b0e18c4c80bd94098fda035e0e20d28b|source-only
+component|postmarketOS-pmaports|https://gitlab.postmarketos.org/postmarketOS/pmaports.git|875bddba6538818f2c3c9849e184f40688ad5140|source-only
 component|pmbootstrap|https://gitlab.postmarketOS.org/postmarketOS/pmbootstrap.git|c5b2a8884aba8251b2452caa527d2839bbf14feb|source-only
 component|oneplus6t-pmos-fixes|https://github.com/lolren/oneplus6t-pmos-fixes.git|b95e91a6240c88acf00a191f605532819495250b|source-and-device-tools
 component|advanced-snapshot|https://github.com/lolren/advanced-snapshot.git|937b18ab17a16dd340ab3b4a58e578f077bf6d51|source-and-app

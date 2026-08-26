@@ -11,8 +11,9 @@ phone still needs physical recovery and runtime acceptance after a Waydroid
 rootfs I/O deadlock; this repository does not claim that a camera bundle is
 installed or that Android camera performance is accepted. The current source
 pins include the libcamera r26 manual-exposure candidate and Advanced Snapshot
-r13; both now have clean AArch64 package evidence, but live-device acceptance
-is still required before they become an installable generation.
+r14 Software HDR source; the retained r13 pair has clean AArch64 package
+evidence, but live-device acceptance and an r14 package rebuild are still
+required before a new generation becomes installable.
 
 ## What belongs here
 
@@ -230,9 +231,9 @@ is present.
 The current manifest pins
 `oneplus6t-pmos-fixes` at
 `02dae36722483e93453419c3a5cc3d354969dc3e` and Advanced Snapshot at
-`a39f13e213c13cc1eca51eea1d8ee05df6389983`. These source revisions contain
+`af69a7151b8fcba1d0650fd911f42e340279e8d0`. These source revisions contain
 the five-package libcamera r26/manual-exposure candidate, its guarded
-generation manager and the Advanced Snapshot r13 UI/helper wiring. The exact
+generation manager and the Advanced Snapshot r14 UI/helper/HDR wiring. The exact
 package hashes, signing key and offline repository indexes for installable
 binary generations remain maintained in the pinned `oneplus6t-pmos-fixes`
 checkout.

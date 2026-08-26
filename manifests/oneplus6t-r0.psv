@@ -7,13 +7,13 @@ channel|development
 component|postmarketOS-pmaports|https://gitlab.postmarketos.org/postmarketOS/pmaports.git|875bddba6538818f2c3c9849e184f40688ad5140|source-only
 component|pmbootstrap|https://gitlab.postmarketOS.org/postmarketOS/pmbootstrap.git|c5b2a8884aba8251b2452caa527d2839bbf14feb|source-only
 component|oneplus6t-pmos-fixes|https://github.com/lolren/oneplus6t-pmos-fixes.git|02dae36722483e93453419c3a5cc3d354969dc3e|source-and-device-tools
-component|advanced-snapshot|https://github.com/lolren/advanced-snapshot.git|a39f13e213c13cc1eca51eea1d8ee05df6389983|source-and-app
+component|advanced-snapshot|https://github.com/lolren/advanced-snapshot.git|af69a7151b8fcba1d0650fd911f42e340279e8d0|source-and-app
 policy|ordinary-upgrade|pmos-safe-upgrade-simulation-required
 policy|camera-critical|manifest-generation-and-sensor-health-required
 policy|display-kernel|manifest-simulation-and-manual-reboot-required
 policy|waydroid|rootfs-mounts-zero-and-io-pressure-clear-required
 status|native-camera|runtime-acceptance-pending
-status|camera-source|libcamera-r26-and-advanced-snapshot-r13-package-checkpoint
+status|camera-source|libcamera-r26-and-advanced-snapshot-r14-source-r13-package-checkpoint
 status|display-kernel|r9-candidate-runtime-acceptance-pending
 status|waydroid-camera|runtime-acceptance-pending
 status|location-nfc-audio|runtime-acceptance-pending

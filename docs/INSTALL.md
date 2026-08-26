@@ -158,13 +158,14 @@ The development manifest currently pins:
   libcamera r26/manual-exposure source candidate, guarded generation manager,
   package evidence and the composed pmaports recipe; and
 - Advanced Snapshot at
-  `a39f13e213c13cc1eca51eea1d8ee05df6389983`, containing the r13 manual
-  shutter/analogue-gain controls.
+  `af69a7151b8fcba1d0650fd911f42e340279e8d0`, containing the r14 Software HDR
+  helper and manual shutter/analogue-gain controls.
 
-These revisions are reproducible source checkpoints. The r13 AArch64 pair and
+These revisions are reproducible source checkpoints. The retained r13 AArch64 pair and
 matching libcamera r26/IPA and PipeWire r7 packages are published as the
 opt-in `camera-r26-r13` prerelease, but that generation is not yet phone-
-accepted. The artifact fetcher keeps the earlier signed r7/r5 through r7/r11
+accepted. The r14 source has passed its pinned host build and source tests, but
+its AArch64 package pair is not yet built. The artifact fetcher keeps the earlier signed r7/r5 through r7/r11
 generations available, and retains their own rollback and verification rules.
 
 ## Fetch the published camera stages

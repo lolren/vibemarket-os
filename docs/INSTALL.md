@@ -139,17 +139,17 @@ new manifest revision rather than installing from a dirty checkout.
 The development manifest currently pins:
 
 - `oneplus6t-pmos-fixes` at
-  `c9c0beb889171605c443c8ced63be681ac62c3dd`, containing the libcamera r26
+  `92e5346c1187066b61ae37ffb1b2870d2ecaccd6`, containing the libcamera r26
   manual-exposure source candidate and the composed pmaports recipe; and
 - Advanced Snapshot at
-  `eeff1da290bb97b8b50f38fb5493b8226c32b4d7`, containing the r13 manual
+  `a0979d1ef0a9af223597c18bccca38c39ef465da`, containing the r13 manual
   shutter/analogue-gain controls.
 
-These revisions are reproducible source checkpoints, not a claim that r13 is
-already packaged or accepted on the phone. Build the pinned pmaports recipe
-for an AArch64 package before installing it. The artifact fetcher below still
-publishes the earlier signed r7/r5 through r7/r11 generations, which retain
-their own rollback and verification rules.
+These revisions are reproducible source checkpoints. The r13 AArch64 pair has
+now been built and package-validated locally, but is not yet a published or
+phone-accepted generation. The artifact fetcher below still publishes the
+earlier signed r7/r5 through r7/r11 generations, which retain their own
+rollback and verification rules.
 
 ## Fetch the published camera stages
 

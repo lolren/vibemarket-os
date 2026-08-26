@@ -198,17 +198,18 @@ is present.
 
 The current manifest pins
 `oneplus6t-pmos-fixes` at
-`c9c0beb889171605c443c8ced63be681ac62c3dd` and Advanced Snapshot at
-`eeff1da290bb97b8b50f38fb5493b8226c32b4d7`. These source revisions contain
+`92e5346c1187066b61ae37ffb1b2870d2ecaccd6` and Advanced Snapshot at
+`a0979d1ef0a9af223597c18bccca38c39ef465da`. These source revisions contain
 the libcamera r26 manual shutter/analogue-gain candidate and the Advanced
 Snapshot r13 UI/helper wiring. The exact package hashes, signing key and
 offline repository indexes for installable binary generations remain
 maintained in the pinned `oneplus6t-pmos-fixes` checkout.
 
 The published binary camera stages below are still the earlier r7/r5 through
-r7/r11 generations. The r13 manual-exposure work is source-only until its
-AArch64 package and device validation are complete; it is intentionally not
-pretended to be downloadable through `vibe-fetch-artifacts` yet.
+r7/r11 generations. The r13 pair is now built and package-validated locally,
+but remains unpublished and uninstalled until the matching libcamera stack and
+physical-device validation complete; it is intentionally not offered through
+`vibe-fetch-artifacts` yet.
 
 The matching development AArch64 camera stage is published in the
 [camera-r7-r5 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r5).

@@ -211,7 +211,7 @@ is present.
 
 The current manifest pins
 `oneplus6t-pmos-fixes` at
-`e466f39cb2fb739d1c32613f7e6c77eddb6180cf` and Advanced Snapshot at
+`a19b94963b4116730b0a462bfc243327e338fcb5` and Advanced Snapshot at
 `a39f13e213c13cc1eca51eea1d8ee05df6389983`. These source revisions contain
 the five-package libcamera r26/manual-exposure candidate, its guarded
 generation manager and the Advanced Snapshot r13 UI/helper wiring. The exact

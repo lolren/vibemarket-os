@@ -113,6 +113,18 @@ verified stage. `vibe-install` uses the r7/r5 native manifest by default;
 pass `--camera-generation r7-r6` when the matching `--native r7-r6` stage has
 been fetched and you deliberately want to review the capture-safety candidate.
 
+To run the bundled daily-use acceptance checks immediately after the applied
+transaction, add --acceptance-output /private/path/acceptance. The runner
+keeps one report per subsystem and returns non-zero if any selected check
+fails:
+
+~~~sh
+./scripts/vibe-install --fixes-root "$fixes" \
+  --artifacts-root /tmp/vibemarket-os-r0-artifacts \
+  --acceptance-output "$HOME/oneplus6t-acceptance/post-install" \
+  --apply
+~~~
+
 Before the second command, close camera applications and stop the Waydroid
 session/container as documented by the component repository. The installer
 does not touch partitions, boot slots, firmware or the bootloader. A Waydroid

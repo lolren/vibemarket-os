@@ -27,6 +27,10 @@ printf '%s\n' '#!/bin/sh' \
 	'printf "%s\\n" waydroid_stage=$stage' \
 	'printf "%s\\n" result=pass' >"$fixes_root/scripts/install-waydroid-camera"
 chmod +x "$fixes_root/scripts/install-waydroid-camera"
+printf '%s\n' '#!/bin/sh' \
+	'printf "%s\\n" acceptance_called=yes' \
+	'printf "%s\\n" result=pass' >"$fixes_root/scripts/run-device-acceptance"
+chmod +x "$fixes_root/scripts/run-device-acceptance"
 touch "$fixes_root/data/camera-generation-r7-r5.psv"
 touch "$fixes_root/data/camera-generation-r7-r6.psv"
 git -C "$fixes_root" add scripts data
@@ -54,6 +58,14 @@ env $common_env "$INSTALL" --manifest "$manifest" \
 grep -Fqx "fixes_revision=$revision" "$TEST_DIR/pass-report"
 grep -Fqx 'manager_called=yes' "$TEST_DIR/pass-report"
 grep -Fqx 'result=pass' "$TEST_DIR/pass-report"
+
+acceptance_output=$TEST_DIR/acceptance-output
+env $common_env "$INSTALL" --manifest "$manifest" \
+	--fixes-root "$fixes_root" --artifacts-root "$artifacts_root" \
+	--evidence "$TEST_DIR/apply-evidence" \
+	--acceptance-output "$acceptance_output" --apply >"$TEST_DIR/apply-report"
+grep -Fqx 'acceptance_called=yes' "$TEST_DIR/apply-report"
+grep -Fqx 'result=pass' "$TEST_DIR/apply-report"
 
 env $common_env "$INSTALL" --manifest "$manifest" \
 	--fixes-root "$fixes_root" --camera-generation r7-r6 \

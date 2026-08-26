@@ -11,6 +11,7 @@ artifacts_root=
 camera_generation=r7-r5
 waydroid_candidate=
 evidence=${VIBEMARKET_EVIDENCE_DIR:-}
+acceptance_output=
 sudo_command=${VIBEMARKET_SUDO:-sudo}
 apply=no
 
@@ -29,6 +30,8 @@ Waydroid camera stage. Simulation is the default.
   --waydroid-candidate N select r37 or r38 below --artifacts-root
   --manifest FILE        VibeMarketOS manifest
   --evidence DIR         evidence directory for native package simulation
+  --acceptance-output DIR
+                         run the bundled post-install acceptance checks there
   --apply                apply after all safety checks; otherwise simulate
   -h, --help             show this help
 
@@ -85,6 +88,11 @@ while [ "$#" -gt 0 ]; do
 	--evidence)
 		[ "$#" -ge 2 ] || die '--evidence requires a directory'
 		evidence=$2
+		shift 2
+		;;
+	--acceptance-output)
+		[ "$#" -ge 2 ] || die '--acceptance-output requires a directory'
+		acceptance_output=$2
 		shift 2
 		;;
 	--apply)
@@ -185,6 +193,14 @@ if [ -n "$waydroid_stage" ]; then
 	else
 		"$sudo_command" "$installer" "$waydroid_stage"
 	fi
+fi
+
+if [ -n "$acceptance_output" ]; then
+	[ "$apply" = yes ] || die '--acceptance-output requires --apply'
+	acceptance_runner=$fixes_root/scripts/run-device-acceptance
+	[ -x "$acceptance_runner" ] || \
+		die "missing acceptance runner: $acceptance_runner"
+	"$acceptance_runner" --output "$acceptance_output"
 fi
 
 printf 'mode=%s\n' "$apply"

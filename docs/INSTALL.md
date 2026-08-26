@@ -62,6 +62,12 @@ simulation and preflight are clean. Native package changes use
 `install-waydroid-camera`. Their backup, signature, mount and rollback rules
 remain authoritative.
 
+For an automatic post-install verification bundle, add
+--acceptance-output DIRECTORY to the applied command. It requires the
+acceptance runner in the pinned fixes checkout, keeps per-subsystem logs and
+returns a failure if any selected check fails. The runner does not install
+anything or reboot.
+
 The product installer never performs a reboot. Reboot persistence is a
 separate acceptance test after the phone is stable.
 

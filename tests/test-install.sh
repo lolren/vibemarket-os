@@ -32,6 +32,10 @@ printf '%s\n' '#!/bin/sh' \
 	'printf "%s\\n" result=pass' >"$fixes_root/scripts/run-device-acceptance"
 chmod +x "$fixes_root/scripts/run-device-acceptance"
 printf '%s\n' '#!/bin/sh' \
+	'printf "%s\\n" daily_use_called=yes' \
+	'printf "%s\\n" result=pass' >"$fixes_root/scripts/configure-daily-use"
+chmod +x "$fixes_root/scripts/configure-daily-use"
+printf '%s\n' '#!/bin/sh' \
 	'printf "%s\\n" display_manager_called=yes' \
 	'printf "%s\\n" result=pass' >"$fixes_root/scripts/manage-display-kernel"
 chmod +x "$fixes_root/scripts/manage-display-kernel"
@@ -68,6 +72,16 @@ env $common_env "$INSTALL" --manifest "$manifest" \
 grep -Fqx "fixes_revision=$revision" "$TEST_DIR/pass-report"
 grep -Fqx 'manager_called=yes' "$TEST_DIR/pass-report"
 grep -Fqx 'result=pass' "$TEST_DIR/pass-report"
+
+env $common_env "$INSTALL" --manifest "$manifest" \
+	--fixes-root "$fixes_root" --daily-use >"$TEST_DIR/daily-report"
+grep -Fqx 'daily_use_called=yes' "$TEST_DIR/daily-report"
+grep -Fqx 'result=pass' "$TEST_DIR/daily-report"
+
+env $common_env "$INSTALL" --manifest "$manifest" \
+	--fixes-root "$fixes_root" --daily-use --apply >"$TEST_DIR/daily-apply-report"
+grep -Fqx 'daily_use_called=yes' "$TEST_DIR/daily-apply-report"
+grep -Fqx 'result=pass' "$TEST_DIR/daily-apply-report"
 
 acceptance_output=$TEST_DIR/acceptance-output
 env $common_env "$INSTALL" --manifest "$manifest" \

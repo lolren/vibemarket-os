@@ -60,6 +60,21 @@ reboots. A healthy Waydroid install must additionally report
   --require-device --require-clean-waydroid
 ```
 
+After reviewing the carrier selection, configure the non-camera daily-use
+helpers through the same product wrapper. The first command previews; the
+second applies through the normal user's `sudo` and D-Bus session:
+
+```sh
+./scripts/vibe-install --fixes-root /path/to/oneplus6t-pmos-fixes \
+  --daily-use
+./scripts/vibe-install --fixes-root /path/to/oneplus6t-pmos-fixes \
+  --daily-use --apply
+```
+
+The component's [daily-use guide](https://github.com/lolren/oneplus6t-pmos-fixes/blob/main/docs/DAILY-USE.md)
+describes the provider database, Smarty GID rule and independent rollback
+commands. This option never touches camera packages, Waydroid or boot state.
+
 Fetch the exact source revisions on a development host:
 
 ```sh

@@ -70,6 +70,20 @@ acceptance runner in the pinned fixes checkout, keeps per-subsystem logs and
 returns a failure if any selected check fails. The runner does not install
 anything or reboot.
 
+To configure mobile data, network time and the microphone route without
+selecting a camera or Waydroid stage, use the opt-in daily-use operation:
+
+```sh
+./scripts/vibe-install --fixes-root "$fixes" --daily-use
+./scripts/vibe-install --fixes-root "$fixes" --daily-use --apply
+```
+
+The first command runs the component's dry-run APN selection. The second must
+run as the normal graphical user so `sudo` can handle privileged helpers and
+`systemctl --user` can enable the audio service. See the component's
+[DAILY-USE.md](https://github.com/lolren/oneplus6t-pmos-fixes/blob/main/docs/DAILY-USE.md)
+for carrier selection and rollback.
+
 The product installer never performs a reboot. Reboot persistence is a
 separate acceptance test after the phone is stable.
 

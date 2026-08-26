@@ -13,6 +13,8 @@ camera_generation=r7-r5
 display_candidate=
 display_operation=install
 waydroid_candidate=
+daily_use=no
+daily_use_command=${VIBEMARKET_DAILY_USE_COMMAND:-}
 evidence=${VIBEMARKET_EVIDENCE_DIR:-}
 acceptance_output=
 sudo_command=${VIBEMARKET_SUDO:-sudo}
@@ -35,6 +37,7 @@ default.
   --display-candidate N  r8-r9 below --artifacts-root
   --display-operation N  install (default) or rollback
   --waydroid-candidate N select r37 or r38 below --artifacts-root
+  --daily-use             preview/apply cellular, time and audio setup
   --manifest FILE        VibeMarketOS manifest
   --evidence DIR         evidence directory for native package simulation
   --acceptance-output DIR
@@ -103,6 +106,10 @@ while [ "$#" -gt 0 ]; do
 		waydroid_candidate=$2
 		shift 2
 		;;
+	--daily-use)
+		daily_use=yes
+		shift
+		;;
 	--manifest)
 		[ "$#" -ge 2 ] || die '--manifest requires a file'
 		manifest=$2
@@ -168,6 +175,7 @@ if [ -n "$waydroid_candidate" ]; then
 fi
 
 [ -n "$camera_stage" ] || [ -n "$display_stage" ] || [ -n "$waydroid_stage" ] || \
+	[ "$daily_use" = yes ] || \
 	die 'provide --camera-stage, --display-stage and/or --waydroid-stage'
 
 [ -z "$camera_stage" ] || [ -d "$camera_stage" ] || \
@@ -198,6 +206,21 @@ actual_fixes_revision=$(git -C "$fixes_root" rev-parse HEAD 2>/dev/null) || \
 [ -z "$(git -C "$fixes_root" status --porcelain --untracked-files=all)" ] || \
 	die "fixes checkout is dirty; use a clean checkout of $expected_fixes_revision"
 printf 'fixes_revision=%s\n' "$actual_fixes_revision"
+
+if [ "$daily_use" = yes ]; then
+	if [ -z "$daily_use_command" ]; then
+		daily_use_command=$fixes_root/scripts/configure-daily-use
+	fi
+	case "$daily_use_command" in
+	/*) [ -x "$daily_use_command" ] || die "daily-use helper is not executable: $daily_use_command" ;;
+	*) command -v "$daily_use_command" >/dev/null 2>&1 || die "daily-use helper not found: $daily_use_command" ;;
+	esac
+	if [ "$apply" = yes ]; then
+		"$daily_use_command" --apply
+	else
+		"$daily_use_command"
+	fi
+fi
 
 if [ -n "$camera_stage" ]; then
 	manager=$fixes_root/scripts/manage-camera-generation

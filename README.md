@@ -8,8 +8,11 @@ and keeps camera-critical updates behind compatibility and health checks.
 
 The first manifest is deliberately marked development-only. The reference
 phone still needs physical recovery and runtime acceptance after a Waydroid
-rootfs I/O deadlock; this repository does not claim that the current camera
-bundle is installed or that Android camera performance is accepted.
+rootfs I/O deadlock; this repository does not claim that a camera bundle is
+installed or that Android camera performance is accepted. The current source
+pins include the libcamera r26 manual-exposure candidate and Advanced Snapshot
+r12, but those source changes still need a clean AArch64 package build and
+live-device acceptance before they can become an installable generation.
 
 ## What belongs here
 
@@ -193,10 +196,19 @@ does not touch partitions, boot slots, firmware or the bootloader. A Waydroid
 overlay operation is refused while any rootfs mount or blocking I/O pressure
 is present.
 
-The current manifest pins the native camera generation to PipeWire r7 with
-Advanced Snapshot r7 and the manifest-verified r7/r4 rollback. The exact
-package hashes, signing key and offline repository indexes are maintained in
-the pinned `oneplus6t-pmos-fixes` checkout.
+The current manifest pins
+`oneplus6t-pmos-fixes` at
+`543229cd4aa2a7e0f0b96aabdbadc86736c28741` and Advanced Snapshot at
+`20e4f046e133c67adf8c6ccfdaacc479a88e5210`. These source revisions contain
+the libcamera r26 manual shutter/analogue-gain candidate and the Advanced
+Snapshot r12 UI/helper wiring. The exact package hashes, signing key and
+offline repository indexes for installable binary generations remain
+maintained in the pinned `oneplus6t-pmos-fixes` checkout.
+
+The published binary camera stages below are still the earlier r7/r5 through
+r7/r11 generations. The r12 manual-exposure work is source-only until its
+AArch64 package and device validation are complete; it is intentionally not
+pretended to be downloadable through `vibe-fetch-artifacts` yet.
 
 The matching development AArch64 camera stage is published in the
 [camera-r7-r5 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r5).

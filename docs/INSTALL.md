@@ -134,6 +134,23 @@ Then pass `/tmp/vibemarket-os-r0-sources/oneplus6t-pmos-fixes` as
 `--fixes-root`. If you intentionally change a component, create and review a
 new manifest revision rather than installing from a dirty checkout.
 
+## Current source checkpoint
+
+The development manifest currently pins:
+
+- `oneplus6t-pmos-fixes` at
+  `543229cd4aa2a7e0f0b96aabdbadc86736c28741`, containing the libcamera r26
+  manual-exposure source candidate and the composed pmaports recipe; and
+- Advanced Snapshot at
+  `20e4f046e133c67adf8c6ccfdaacc479a88e5210`, containing the r12 manual
+  shutter/analogue-gain controls.
+
+These revisions are reproducible source checkpoints, not a claim that r12 is
+already packaged or accepted on the phone. Build the pinned pmaports recipe
+for an AArch64 package before installing it. The artifact fetcher below still
+publishes the earlier signed r7/r5 through r7/r11 generations, which retain
+their own rollback and verification rules.
+
 ## Fetch the published camera stages
 
 The source checkout and binary camera stages are separate. Fetch the exact

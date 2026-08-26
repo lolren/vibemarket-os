@@ -139,7 +139,7 @@ new manifest revision rather than installing from a dirty checkout.
 The development manifest currently pins:
 
 - `oneplus6t-pmos-fixes` at
-  `2357730ce527809ea1c4bd3df99b26dac3e7aee4`, containing the libcamera r26
+  `13baaa2dad0a91728dd429a373106c52eb0af958`, containing the libcamera r26
   manual-exposure source candidate, package evidence and the composed pmaports
   recipe; and
 - Advanced Snapshot at

@@ -32,6 +32,13 @@ The first command checks the manifest and device identity. The second also
 requires the read-only Waydroid mount/I/O gate. Both commands are safe to run
 while the phone is in normal use.
 
+If the phone exposes USB NCM and answers ping but SSH is unavailable, install
+the standalone [runtime-r16 helper package](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/runtime-r16)
+from the phone's local terminal after verifying its `SHA256SUMS` file, then
+run `sudo pmos-enable-ssh --apply`. The component's
+[transport recovery guide](https://github.com/lolren/oneplus6t-pmos-fixes/blob/main/docs/TRANSPORT.md)
+also documents the direct systemd/OpenRC fallback.
+
 For the reported horizontal static or brightness-slider crash, collect the
 read-only display report from the fixes component:
 
@@ -154,7 +161,7 @@ new manifest revision rather than installing from a dirty checkout.
 The development manifest currently pins:
 
 - `oneplus6t-pmos-fixes` at
-  `75636dcb382b7832dedfde8296a4b22982e71d0f`, containing the five-package
+  `3d09095026b260f2d30089d72ada7284e8cd853f`, containing the five-package
   libcamera r26/manual-exposure source candidate, guarded generation manager,
   package evidence and the composed pmaports recipe; and
 - Advanced Snapshot at

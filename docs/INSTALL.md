@@ -30,6 +30,17 @@ The first command checks the manifest and device identity. The second also
 requires the read-only Waydroid mount/I/O gate. Both commands are safe to run
 while the phone is in normal use.
 
+For the reported horizontal static or brightness-slider crash, collect the
+read-only display report from the fixes component:
+
+```sh
+pmos-check-display --output /tmp/oneplus6t-display-report.txt
+```
+
+It records DRM connector/mode, backlight and filtered display-kernel evidence
+without changing the display. The full procedure and interpretation are in
+the [component display documentation](https://github.com/lolren/oneplus6t-pmos-fixes/blob/main/docs/DISPLAY.md).
+
 ## Simulate, then apply
 
 ```sh

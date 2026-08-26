@@ -82,6 +82,11 @@ installer because it changes the Waydroid system image. Follow the
 run its read-only package verifier afterward, and reapply the guarded camera
 overlay only after the health gate is clean.
 
+The OnePlus display/brightness static report is also provided by the fixes
+component; use its read-only `pmos-check-display` procedure after recovery
+before proposing a kernel or panel change. See the [display diagnostic
+documentation](https://github.com/lolren/oneplus6t-pmos-fixes/blob/main/docs/DISPLAY.md).
+
 ## Update policy
 
 Run `pmos-safe-upgrade --simulate` for ordinary postmarketOS updates. If a

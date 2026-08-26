@@ -19,6 +19,10 @@ WirePlumber, Snapshot, Advanced Snapshot or the OnePlus SDM845 kernel is
 refused. The wrapper applies only a transaction whose simulation contains no
 camera-critical package.
 
+The wrapper and the generation manager force `LC_ALL=C` while parsing APK
+operation lines. This keeps the safety decision independent of the login
+user's translation settings.
+
 ## Camera generations
 
 A camera-critical change is released as a new signed generation in the

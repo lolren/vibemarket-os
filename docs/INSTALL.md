@@ -143,7 +143,7 @@ The development manifest currently pins:
   manual-exposure source candidate, package evidence and the composed pmaports
   recipe; and
 - Advanced Snapshot at
-  `a0979d1ef0a9af223597c18bccca38c39ef465da`, containing the r13 manual
+  `a39f13e213c13cc1eca51eea1d8ee05df6389983`, containing the r13 manual
   shutter/analogue-gain controls.
 
 These revisions are reproducible source checkpoints. The r13 AArch64 pair and

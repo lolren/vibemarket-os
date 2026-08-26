@@ -154,19 +154,20 @@ new manifest revision rather than installing from a dirty checkout.
 The development manifest currently pins:
 
 - `oneplus6t-pmos-fixes` at
-  `02dae36722483e93453419c3a5cc3d354969dc3e`, containing the five-package
+  `58446c8f5c0b397acd7b6ceb1ade706b3fb7bfc8`, containing the five-package
   libcamera r26/manual-exposure source candidate, guarded generation manager,
   package evidence and the composed pmaports recipe; and
 - Advanced Snapshot at
-  `af69a7151b8fcba1d0650fd911f42e340279e8d0`, containing the r14 Software HDR
+  `d078e8e8b27b407a830197af34ffacbe54eb088a`, containing the r14 Software HDR
   helper and manual shutter/analogue-gain controls.
 
 These revisions are reproducible source checkpoints. The retained r13 AArch64 pair and
 matching libcamera r26/IPA and PipeWire r7 packages are published as the
 opt-in `camera-r26-r13` prerelease, but that generation is not yet phone-
-accepted. The r14 source has passed its pinned host build and source tests, but
-its AArch64 package pair is not yet built. The artifact fetcher keeps the earlier signed r7/r5 through r7/r11
-generations available, and retains their own rollback and verification rules.
+accepted. The signed r14 pair and complete r26/r14 bundle are also published;
+that generation remains opt-in until physical acceptance. The artifact fetcher
+keeps the earlier signed r7/r5 through r7/r11 generations available, and
+retains their own rollback and verification rules.
 
 ## Fetch the published camera stages
 
@@ -215,6 +216,13 @@ The opt-in lower-stack r26/r13 candidate can be selected explicitly:
   --root /tmp/vibemarket-os-r0-artifacts --native r26-r13 --waydroid r37
 ```
 
+The current r26/r14 Software HDR candidate can be selected explicitly:
+
+```sh
+./scripts/vibe-fetch-artifacts \
+  --root /tmp/vibemarket-os-r0-artifacts --native r26-r14 --waydroid r37
+```
+
 The display-kernel r8/r9 candidate can be fetched alongside the selected
 camera/Waydroid artifacts with `--display r8-r9`. It creates
 `display-kernel-stage-r8-r9`; the product installer selects it with
@@ -258,6 +266,10 @@ For the lower-stack r26/r13 stage, use `--native r26-r13` while fetching and
 `--camera-generation r26-r13` while installing; its rollback is the retained
 r24/r11 five-package stack. This candidate has host-side package evidence but
 still requires physical-device acceptance.
+For the current lower-stack r26/r14 stage, use `--native r26-r14` while
+fetching and `--camera-generation r26-r14` while installing; its rollback is
+the same retained r24/r11 five-package stack. Its Software HDR helper is
+opt-in and still requires physical-device acceptance.
 
 The exact native bundle is the
 [camera-r7-r5 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r5).
@@ -271,5 +283,7 @@ The opt-in r7/r11 bounded rear-flash bundle is the
 [camera-r7-r11 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r11).
 The opt-in lower-stack r26/r13 bundle is the
 [camera-r26-r13 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r26-r13).
+The current opt-in lower-stack r26/r14 Software HDR bundle is the
+[camera-r26-r14 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r26-r14).
 The two Waydroid candidates and their checksums are in the
 [Waydroid camera r37/r38 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/waydroid-camera-r37-r38).

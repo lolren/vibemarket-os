@@ -45,6 +45,7 @@ touch "$fixes_root/data/camera-generation-r7-r7.psv"
 touch "$fixes_root/data/camera-generation-r7-r10.psv"
 touch "$fixes_root/data/camera-generation-r7-r11.psv"
 touch "$fixes_root/data/camera-generation-r26-r13.psv"
+touch "$fixes_root/data/camera-generation-r26-r14.psv"
 touch "$fixes_root/data/display-kernel-r8-r9.psv"
 git -C "$fixes_root" add scripts data
 git -C "$fixes_root" commit --quiet -m initial
@@ -120,6 +121,12 @@ env $common_env "$INSTALL" --manifest "$manifest" --fixes-root "$fixes_root" \
 	--camera-stage "$artifacts_root/native-camera-stage" \
 	--evidence "$TEST_DIR/r26-r13-evidence" >"$TEST_DIR/r26-r13-report"
 grep -Fqx 'manager_called=yes' "$TEST_DIR/r26-r13-report"
+
+env $common_env "$INSTALL" --manifest "$manifest" --fixes-root "$fixes_root" \
+	--camera-generation r26-r14 \
+	--camera-stage "$artifacts_root/native-camera-stage" \
+	--evidence "$TEST_DIR/r26-r14-evidence" >"$TEST_DIR/r26-r14-report"
+grep -Fqx 'manager_called=yes' "$TEST_DIR/r26-r14-report"
 
 env $common_env "$INSTALL" --manifest "$manifest" \
 	--fixes-root "$fixes_root" --artifacts-root "$artifacts_root" \

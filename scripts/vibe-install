@@ -33,7 +33,7 @@ default.
   --display-stage DIR    display-kernel stage containing candidate/rollback
   --waydroid-stage DIR   Waydroid camera overlay stage
   --artifacts-root DIR   output directory from vibe-fetch-artifacts
-  --camera-generation N  r7-r5 (default), r7-r6, r7-r7, r7-r10, r7-r11 or r26-r13 native manifest
+  --camera-generation N  r7-r5 (default), r7-r6, r7-r7, r7-r10, r7-r11, r26-r13 or r26-r14 native manifest
   --display-candidate N  r8-r9 below --artifacts-root
   --display-operation N  install (default) or rollback
   --waydroid-candidate N select r37 or r38 below --artifacts-root
@@ -87,7 +87,7 @@ while [ "$#" -gt 0 ]; do
 		shift 2
 		;;
 	--camera-generation)
-		[ "$#" -ge 2 ] || die '--camera-generation requires r7-r5, r7-r6, r7-r7, r7-r10, r7-r11 or r26-r13'
+		[ "$#" -ge 2 ] || die '--camera-generation requires r7-r5, r7-r6, r7-r7, r7-r10, r7-r11, r26-r13 or r26-r14'
 		camera_generation=$2
 		shift 2
 		;;
@@ -141,8 +141,8 @@ while [ "$#" -gt 0 ]; do
 done
 
 case "$camera_generation" in
-r7-r5|r7-r6|r7-r7|r7-r10|r7-r11|r26-r13) ;;
-*) die "unsupported camera generation: $camera_generation (expected r7-r5, r7-r6, r7-r7, r7-r10, r7-r11 or r26-r13)" ;;
+r7-r5|r7-r6|r7-r7|r7-r10|r7-r11|r26-r13|r26-r14) ;;
+*) die "unsupported camera generation: $camera_generation (expected r7-r5, r7-r6, r7-r7, r7-r10, r7-r11, r26-r13 or r26-r14)" ;;
 esac
 
 case "$display_candidate" in

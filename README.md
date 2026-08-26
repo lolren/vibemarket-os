@@ -12,8 +12,9 @@ rootfs I/O deadlock; this repository does not claim that a camera bundle is
 installed or that Android camera performance is accepted. The current source
 pins include the libcamera r26 manual-exposure candidate and Advanced Snapshot
 r14 Software HDR source; the retained r13 pair has clean AArch64 package
-evidence, but live-device acceptance and an r14 package rebuild are still
-required before a new generation becomes installable.
+evidence, and the signed r14 pair is now available in a complete offline
+generation. Live-device acceptance is still required before it becomes
+supported.
 
 ## What belongs here
 
@@ -130,6 +131,14 @@ testing the matching libcamera runtime and manual-exposure UI:
   --root /tmp/vibemarket-os-r0-artifacts --native r26-r13 --waydroid r37
 ```
 
+The current r26/r14 candidate adds the opt-in Software HDR helper to the same
+lower-stack transition:
+
+```sh
+./scripts/vibe-fetch-artifacts \
+  --root /tmp/vibemarket-os-r0-artifacts --native r26-r14 --waydroid r37
+```
+
 The display-kernel candidate can be fetched explicitly as well. It is kept
 separate from the default camera selection because applying a kernel requires
 a manual reboot and a dedicated physical display acceptance pass:
@@ -156,6 +165,7 @@ the opt-in [camera-r7-r7 save-feedback candidate](https://github.com/lolren/onep
 the opt-in [camera-r7-r10 adjustment-safety candidate](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r10);
 the opt-in [camera-r7-r11 bounded rear-flash candidate](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r11);
 the opt-in [camera-r26-r13 lower-stack candidate](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r26-r13);
+the opt-in [camera-r26-r14 Software HDR candidate](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r26-r14);
 the Waydroid candidates are in the
 [Waydroid camera r37/r38 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/waydroid-camera-r37-r38).
 
@@ -194,6 +204,11 @@ Pass `--camera-generation r26-r13` with the matching `--native r26-r13` stage
 to review the lower-stack candidate. It upgrades libcamera and its IPA
 atomically with the r13 UI pair, keeps PipeWire r7, and rolls back to the
 r24/r11 five-package stack. This candidate is not hardware-accepted yet.
+Pass `--camera-generation r26-r14` with the matching `--native r26-r14` stage
+to review the current lower-stack candidate. It upgrades libcamera and its IPA
+atomically with the r14 UI/HDR pair, keeps PipeWire r7, and rolls back to the
+r24/r11 five-package stack. The Software HDR path is opt-in and remains
+unhardware-tested.
 
 To review the display candidate from the fetched artifact root, add
 `--display-candidate r8-r9`:
@@ -230,8 +245,8 @@ is present.
 
 The current manifest pins
 `oneplus6t-pmos-fixes` at
-`02dae36722483e93453419c3a5cc3d354969dc3e` and Advanced Snapshot at
-`af69a7151b8fcba1d0650fd911f42e340279e8d0`. These source revisions contain
+`58446c8f5c0b397acd7b6ceb1ade706b3fb7bfc8` and Advanced Snapshot at
+`d078e8e8b27b407a830197af34ffacbe54eb088a`. These source revisions contain
 the five-package libcamera r26/manual-exposure candidate, its guarded
 generation manager and the Advanced Snapshot r14 UI/helper/HDR wiring. The exact
 package hashes, signing key and offline repository indexes for installable
@@ -255,6 +270,8 @@ The opt-in r7/r11 bounded rear-flash stage is published in the
 [camera-r7-r11 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r11).
 The opt-in lower-stack r26/r13 stage is published in the
 [camera-r26-r13 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r26-r13).
+The opt-in lower-stack r26/r14 Software HDR stage is published in the
+[camera-r26-r14 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r26-r14).
 The opt-in display r8/r9 kernel stage is published in the
 [display-r8-r9 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/display-r8-r9).
 

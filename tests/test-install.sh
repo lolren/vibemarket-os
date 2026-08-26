@@ -31,11 +31,16 @@ printf '%s\n' '#!/bin/sh' \
 	'printf "%s\\n" acceptance_called=yes' \
 	'printf "%s\\n" result=pass' >"$fixes_root/scripts/run-device-acceptance"
 chmod +x "$fixes_root/scripts/run-device-acceptance"
+printf '%s\n' '#!/bin/sh' \
+	'printf "%s\\n" display_manager_called=yes' \
+	'printf "%s\\n" result=pass' >"$fixes_root/scripts/manage-display-kernel"
+chmod +x "$fixes_root/scripts/manage-display-kernel"
 touch "$fixes_root/data/camera-generation-r7-r5.psv"
 touch "$fixes_root/data/camera-generation-r7-r6.psv"
 touch "$fixes_root/data/camera-generation-r7-r7.psv"
 touch "$fixes_root/data/camera-generation-r7-r10.psv"
 touch "$fixes_root/data/camera-generation-r7-r11.psv"
+touch "$fixes_root/data/display-kernel-r8-r9.psv"
 git -C "$fixes_root" add scripts data
 git -C "$fixes_root" commit --quiet -m initial
 revision=$(git -C "$fixes_root" rev-parse HEAD)
@@ -52,7 +57,8 @@ policy|camera-critical|manifest-generation-required
 EOF
 artifacts_root=$TEST_DIR/artifacts
 mkdir "$artifacts_root" "$artifacts_root/native-camera-stage" \
-	"$artifacts_root/waydroid-camera-stage-r38"
+	"$artifacts_root/waydroid-camera-stage-r38" \
+	"$artifacts_root/display-kernel-stage-r8-r9"
 
 common_env="VIBEMARKET_COMPATIBLE_FILE=$compatible_file VIBEMARKET_WAYDROID_HEALTH_COMMAND=missing-command"
 env $common_env "$INSTALL" --manifest "$manifest" \
@@ -93,6 +99,12 @@ env $common_env "$INSTALL" --manifest "$manifest" --fixes-root "$fixes_root" \
 	--camera-stage "$artifacts_root/native-camera-stage" \
 	--evidence "$TEST_DIR/r7-r11-evidence" >"$TEST_DIR/r7-r11-report"
 grep -Fqx 'manager_called=yes' "$TEST_DIR/r7-r11-report"
+
+env $common_env "$INSTALL" --manifest "$manifest" \
+	--fixes-root "$fixes_root" --artifacts-root "$artifacts_root" \
+	--display-candidate r8-r9 --evidence "$TEST_DIR/display-evidence" \
+	>"$TEST_DIR/display-report"
+grep -Fqx 'display_manager_called=yes' "$TEST_DIR/display-report"
 
 VIBEMARKET_COMPATIBLE_FILE="$compatible_file" \
 VIBEMARKET_WAYDROID_HEALTH_COMMAND="$health_command" \

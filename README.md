@@ -100,12 +100,22 @@ hardware flash helper is desired:
   --root /tmp/vibemarket-os-r0-artifacts --native r7-r11 --waydroid r37
 ```
 
+The display-kernel candidate can be fetched explicitly as well. It is kept
+separate from the default camera selection because applying a kernel requires
+a manual reboot and a dedicated physical display acceptance pass:
+
+```sh
+./scripts/vibe-fetch-artifacts \
+  --root /tmp/vibemarket-os-r0-artifacts --display r8-r9 --waydroid r37
+```
+
 The native stage is written to
 `/tmp/vibemarket-os-r0-artifacts/native-camera-stage`; the selected Waydroid
 stage is written to
 `/tmp/vibemarket-os-r0-artifacts/waydroid-camera-stage-r37`. Use
 `--waydroid r38` for the alternate GPU candidate or `--waydroid both` to fetch
-both. The script accepts only HTTPS URLs, verifies the archive and checksum
+both. When selected, the display stage is written to
+`/tmp/vibemarket-os-r0-artifacts/display-kernel-stage-r8-r9`. The script accepts only HTTPS URLs, verifies the archive and checksum
 manifest hashes recorded in
 [`data/oneplus6t-r0-artifacts.psv`](data/oneplus6t-r0-artifacts.psv), rejects
 unsafe archive paths, and refuses to overwrite a non-empty output directory.
@@ -150,6 +160,21 @@ review the bounded rear-flash candidate. It keeps PipeWire r7 and rolls back
 to the r10 app pair; the Hardware flash switch is off by default and applies
 only to rear still captures.
 
+To review the display candidate from the fetched artifact root, add
+`--display-candidate r8-r9`:
+
+```sh
+./scripts/vibe-install --fixes-root "$fixes" \
+  --artifacts-root /tmp/vibemarket-os-r0-artifacts \
+  --display-candidate r8-r9
+```
+
+This runs the pMOS display manager's simulation and leaves the phone unchanged
+until `--apply` is added. After an accepted manual reboot, use
+`--display-candidate r8-r9 --display-operation rollback` with the same stage
+if the candidate fails.
+The manager never reboots or writes firmware.
+
 To run the bundled daily-use acceptance checks immediately after the applied
 transaction, add --acceptance-output /private/path/acceptance. The runner
 keeps one report per subsystem and returns non-zero if any selected check
@@ -183,6 +208,8 @@ The opt-in r7/r10 adjustment-safety stage is published in the
 [camera-r7-r10 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r10).
 The opt-in r7/r11 bounded rear-flash stage is published in the
 [camera-r7-r11 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r11).
+The opt-in display r8/r9 kernel stage is published in the
+[display-r8-r9 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/display-r8-r9).
 
 Optional Play Store/GAPPS setup is intentionally separate from the product
 installer because it changes the Waydroid system image. Follow the
@@ -190,10 +217,11 @@ installer because it changes the Waydroid system image. Follow the
 run its read-only package verifier afterward, and reapply the guarded camera
 overlay only after the health gate is clean.
 
-The OnePlus display/brightness static report is also provided by the fixes
-component; use its read-only `pmos-check-display` procedure after recovery
-before proposing a kernel or panel change. See the [display diagnostic
-documentation](https://github.com/lolren/oneplus6t-pmos-fixes/blob/main/docs/DISPLAY.md).
+The OnePlus display/brightness report and the guarded r8/r9 kernel candidate
+are provided by the fixes component. Use its read-only
+`pmos-check-display` procedure before and after a manually rebooted candidate;
+the display documentation describes the acceptance and rollback sequence.
+See the [display diagnostic documentation](https://github.com/lolren/oneplus6t-pmos-fixes/blob/main/docs/DISPLAY.md).
 For host-side USB recovery evidence, run the pinned checkout's
 [`check-device-transport`](https://github.com/lolren/oneplus6t-pmos-fixes/blob/main/docs/TRANSPORT.md)
 report. CDC-NCM, ADB and fastboot are distinct transports; an empty fastboot
@@ -221,8 +249,9 @@ Waydroid health gates before activation. See
 ## Current status
 
 `oneplus6t-r0.psv` is a source-pinned development manifest, not a production
-release. Native and Waydroid visual acceptance, real location/NFC tests,
-full-call audio and reboot persistence remain device-gated. The state is
+release. Native and Waydroid visual acceptance, the display r9 candidate,
+real location/NFC tests, full-call audio and reboot persistence remain
+device-gated. The state is
 recorded in the component repository's validation log rather than hidden by
 this product layer.
 

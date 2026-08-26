@@ -10,6 +10,7 @@ already boot postmarketOS and expose the normal user SSH/session tools.
 - postmarketOS package tools and the `oneplus6t-pmos-fixes` helpers;
 - an exact, verified camera-generation stage when installing native camera
   packages;
+- an exact, verified display-kernel stage when testing the r9 panel candidate;
 - an exact, verified Waydroid camera stage when installing the Android lower
   layer; and
 - a clean Waydroid preflight before any overlay access.
@@ -70,6 +71,34 @@ anything or reboot.
 
 The product installer never performs a reboot. Reboot persistence is a
 separate acceptance test after the phone is stable.
+
+## Display-kernel candidate
+
+Fetch the display stage explicitly:
+
+```sh
+./scripts/vibe-fetch-artifacts \
+  --root /tmp/vibemarket-os-r0-artifacts --display r8-r9 --waydroid none
+```
+
+The fetcher verifies the archive, its signed-index/package checksum manifest
+and safe archive paths. Review the candidate with the product wrapper:
+
+```sh
+./scripts/vibe-install \
+  --fixes-root /tmp/vibemarket-os-r0-sources/oneplus6t-pmos-fixes \
+  --artifacts-root /tmp/vibemarket-os-r0-artifacts \
+  --display-candidate r8-r9
+```
+
+The command is simulation-only. Add `--apply` only after reviewing the
+one-package transaction and close all camera clients first. The display
+manager never reboots; after a successful manual reboot, run
+`pmos-check-display` and complete the documented brightness, lock/unlock,
+camera-preview and suspend/resume tests. If it fails, use the same wrapper
+with `--display-candidate r8-r9 --display-operation rollback`, review the downgrade and add `--apply`,
+then reboot manually. The exact candidate change and limitations are in the
+[component display documentation](https://github.com/lolren/oneplus6t-pmos-fixes/blob/main/docs/DISPLAY.md).
 
 ## Ordinary postmarketOS updates
 
@@ -144,6 +173,12 @@ The r7/r11 bounded rear-flash candidate can be selected explicitly:
 ./scripts/vibe-fetch-artifacts \
   --root /tmp/vibemarket-os-r0-artifacts --native r7-r11 --waydroid r37
 ```
+
+The display-kernel r8/r9 candidate can be fetched alongside the selected
+camera/Waydroid artifacts with `--display r8-r9`. It creates
+`display-kernel-stage-r8-r9`; the product installer selects it with
+`--display-candidate r8-r9` and keeps the kernel transition separate from the
+Waydroid overlay.
 
 This creates `native-camera-stage` and
 `waydroid-camera-stage-r37` below the output directory. Use `--waydroid r38`

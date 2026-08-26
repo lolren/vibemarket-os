@@ -21,3 +21,9 @@ upstream pmaports moves, rebase the individual component patches and create a
 new manifest generation; never silently apply a rejected patch with `--3way`.
 The resulting package hashes and camera evidence belong in the OnePlus fixes
 generation manifest before a VibeMarketOS release can be promoted.
+
+The current OnePlus-fixes integration also contains the opt-in Samsung
+S6E3FC2X01 brightness-serialization patch and kernel r9 candidate. Build and
+test it as a separate signed display generation; do not combine its reboot
+with an unreviewed pmaports kernel update. The r8 rollback, manifest and
+simulation-first manager are maintained by the fixes component.

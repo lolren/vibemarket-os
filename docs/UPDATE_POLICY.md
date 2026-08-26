@@ -34,6 +34,13 @@ The wrapper and the generation manager force `LC_ALL=C` while parsing APK
 operation lines. This keeps the safety decision independent of the login
 user's translation settings.
 
+The OnePlus display kernel is also camera-critical for ordinary updates. A
+display r9 change must use the signed `display-kernel-r8-r9` stage and
+`pmos-manage-display-kernel`; it is never accepted through a general
+`apk upgrade`. The display manager simulates the one-package transition,
+checks the retained r8 rollback and leaves reboot and physical display
+acceptance to the owner.
+
 `vibe-update` refuses a dirty or incorrectly pinned fixes checkout and accepts
 no arbitrary APK arguments. It never reboots or changes partitions. Its
 `--evidence` option is passed to the component guard as the root for the dated

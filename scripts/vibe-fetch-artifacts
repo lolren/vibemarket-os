@@ -8,13 +8,15 @@ artifacts_file=$script_dir/../data/oneplus6t-r0-artifacts.psv
 root=
 waydroid_selection=both
 native_selection=r7-r5
+display_selection=none
 
 usage() {
 	cat <<EOF
 Usage: $PROGRAM --root DIRECTORY [options]
 
-Download and verify the exact native camera and Waydroid candidate artifacts
-recorded by a VibeMarketOS artifact manifest, then extract fresh stages.
+Download and verify the exact native camera, optional display-kernel and
+Waydroid candidate artifacts recorded by a VibeMarketOS artifact manifest,
+then extract fresh stages.
 This command changes only the host output directory; it never contacts the
 phone or runs a phone installer.
 
@@ -24,7 +26,9 @@ Options:
   --artifacts FILE         artifact manifest
   --native r7-r5|r7-r6|r7-r7|r7-r10|r7-r11
                            native camera generation (default: r7-r5)
-  --waydroid r37|r38|both  candidates to fetch (default: both)
+  --display none|r8-r9     display-kernel candidate (default: none)
+  --waydroid none|r37|r38|both
+                           candidates to fetch (default: both)
   -h, --help               show this help
 EOF
 }
@@ -57,8 +61,13 @@ while [ "$#" -gt 0 ]; do
 		shift 2
 		;;
 	--waydroid)
-		[ "$#" -ge 2 ] || die '--waydroid requires r37, r38 or both'
+		[ "$#" -ge 2 ] || die '--waydroid requires none, r37, r38 or both'
 		waydroid_selection=$2
+		shift 2
+		;;
+	--display)
+		[ "$#" -ge 2 ] || die '--display requires none or r8-r9'
+		display_selection=$2
 		shift 2
 		;;
 	-h|--help)
@@ -76,12 +85,16 @@ done
 [ -r "$manifest" ] || die "manifest is not readable: $manifest"
 [ -r "$artifacts_file" ] || die "artifact manifest is not readable: $artifacts_file"
 case "$waydroid_selection" in
-r37|r38|both) ;;
-*) die '--waydroid must be r37, r38 or both' ;;
+none|r37|r38|both) ;;
+*) die '--waydroid must be none, r37, r38 or both' ;;
 esac
 case "$native_selection" in
 r7-r5|r7-r6|r7-r7|r7-r10|r7-r11) ;;
 *) die '--native must be r7-r5, r7-r6, r7-r7, r7-r10 or r7-r11' ;;
+esac
+case "$display_selection" in
+none|r8-r9) ;;
+*) die '--display must be none or r8-r9' ;;
 esac
 
 for command in awk curl find grep mkdir sha256sum tar; do
@@ -179,12 +192,15 @@ fetch_artifact() {
 	waydroid)
 		stage=$root/waydroid-camera-stage-$generation
 		;;
+	display)
+		stage=$root/display-kernel-stage-$generation
+		;;
 	*) die "unsupported artifact kind: $kind" ;;
 	esac
 	safe_extract "$artifact_dir/$archive" "$stage"
-	if [ "$kind" = waydroid ]; then
+	if [ "$kind" = waydroid ] || [ "$kind" = display ]; then
 		( cd "$stage" && sha256sum -c "$artifact_dir/$checksums" ) || \
-			die "Waydroid package manifest failed for $generation"
+			die "$kind package manifest failed for $generation"
 	fi
 	printf 'stage=%s\n' "$stage"
 }
@@ -193,7 +209,15 @@ native_row=$(artifact_row native "$native_selection") || \
 	die "artifact manifest needs one native $native_selection row"
 fetch_artifact "$native_row"
 
+if [ "$display_selection" != none ]; then
+	display_row=$(artifact_row display "$display_selection") || \
+		die "artifact manifest needs one display $display_selection row"
+	fetch_artifact "$display_row"
+fi
+
 case "$waydroid_selection" in
+none)
+	;;
 r37)
 	waydroid_row=$(artifact_row waydroid r37) || \
 		die 'artifact manifest needs one Waydroid r37 row'

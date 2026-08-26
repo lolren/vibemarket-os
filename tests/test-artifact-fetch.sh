@@ -47,6 +47,27 @@ waydroid_file_hash=$(sha256sum "$waydroid_source/vendor/test.bin" | awk '{ print
 printf '%s  %s\n' "$waydroid_file_hash" vendor/test.bin >"$server/waydroid.sha256"
 waydroid_sums_hash=$(sha256sum "$server/waydroid.sha256" | awk '{ print $1 }')
 
+display_source="$TEST_DIR/display-source"
+mkdir -p "$display_source/candidate/aarch64" "$display_source/rollback/aarch64"
+printf '%s\n' display-candidate-index \
+	>"$display_source/candidate/aarch64/APKINDEX.tar.gz"
+printf '%s\n' display-candidate-package \
+	>"$display_source/candidate/aarch64/linux-postmarketos-qcom-sdm845-7.1_rc1-r9.apk"
+printf '%s\n' display-rollback-index \
+	>"$display_source/rollback/aarch64/APKINDEX.tar.gz"
+printf '%s\n' display-rollback-package \
+	>"$display_source/rollback/aarch64/linux-postmarketos-qcom-sdm845-7.1_rc1-r8.apk"
+(
+	cd "$display_source"
+	sha256sum candidate/aarch64/APKINDEX.tar.gz \
+		candidate/aarch64/linux-postmarketos-qcom-sdm845-7.1_rc1-r9.apk \
+		rollback/aarch64/APKINDEX.tar.gz \
+		rollback/aarch64/linux-postmarketos-qcom-sdm845-7.1_rc1-r8.apk
+) >"$server/display.sha256"
+tar -czf "$server/display.tar.gz" -C "$display_source" candidate rollback
+display_hash=$(sha256sum "$server/display.tar.gz" | awk '{ print $1 }')
+display_sums_hash=$(sha256sum "$server/display.sha256" | awk '{ print $1 }')
+
 cat >"$fakebin/curl" <<'EOF'
 #!/bin/sh
 set -eu
@@ -86,6 +107,7 @@ printf '%s\n' \
 	"artifact|native|r7-r7|native-r7-r7.tar.gz|SHA256SUMS-r7-r7|$native_r7_r7_hash|$native_r7_r7_sums_hash|https://fixture/native" \
 	"artifact|native|r7-r10|native-r7-r10.tar.gz|SHA256SUMS-r7-r10|$native_r7_r10_hash|$native_r7_r10_sums_hash|https://fixture/native" \
 	"artifact|native|r7-r11|native-r7-r11.tar.gz|SHA256SUMS-r7-r11|$native_r7_r11_hash|$native_r7_r11_sums_hash|https://fixture/native" \
+	"artifact|display|r8-r9|display.tar.gz|display.sha256|$display_hash|$display_sums_hash|https://fixture/display" \
 	"artifact|waydroid|r37|waydroid.tar.gz|waydroid.sha256|$waydroid_hash|$waydroid_sums_hash|https://fixture/waydroid" \
 	>"$artifact_manifest"
 
@@ -93,10 +115,11 @@ output="$TEST_DIR/output"
 FIXTURE_SERVER="$server" PATH="$fakebin:$PATH" "$FETCH" \
 	--manifest "$ROOT/manifests/oneplus6t-r0.psv" \
 	--artifacts "$artifact_manifest" \
-	--waydroid r37 \
+	--display r8-r9 --waydroid r37 \
 	--root "$output" >"$TEST_DIR/report"
 
 test -f "$output/native-camera-stage/native.txt"
+test -f "$output/display-kernel-stage-r8-r9/candidate/aarch64/linux-postmarketos-qcom-sdm845-7.1_rc1-r9.apk"
 test -f "$output/waydroid-camera-stage-r37/vendor/test.bin"
 grep -Fqx 'result=pass' "$TEST_DIR/report"
 

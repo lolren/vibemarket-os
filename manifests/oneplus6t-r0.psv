@@ -6,11 +6,13 @@ compatible|oneplus,fajita
 channel|development
 component|postmarketOS-pmaports|https://gitlab.postmarketos.org/postmarketOS/pmaports.git|875bddba6538818f2c3c9849e184f40688ad5140|source-only
 component|pmbootstrap|https://gitlab.postmarketOS.org/postmarketOS/pmbootstrap.git|c5b2a8884aba8251b2452caa527d2839bbf14feb|source-only
-component|oneplus6t-pmos-fixes|https://github.com/lolren/oneplus6t-pmos-fixes.git|65e66f7fa312087a03523a65ab3330b656c68749|source-and-device-tools
+component|oneplus6t-pmos-fixes|https://github.com/lolren/oneplus6t-pmos-fixes.git|1f599df127258224dfc398ff4369f37824ea579f|source-and-device-tools
 component|advanced-snapshot|https://github.com/lolren/advanced-snapshot.git|ee26c7bb1842213e66d07642feca6190b0b7a018|source-and-app
 policy|ordinary-upgrade|pmos-safe-upgrade-simulation-required
 policy|camera-critical|manifest-generation-and-sensor-health-required
+policy|display-kernel|manifest-simulation-and-manual-reboot-required
 policy|waydroid|rootfs-mounts-zero-and-io-pressure-clear-required
 status|native-camera|runtime-acceptance-pending
+status|display-kernel|r9-candidate-runtime-acceptance-pending
 status|waydroid-camera|runtime-acceptance-pending
 status|location-nfc-audio|runtime-acceptance-pending

@@ -6,9 +6,12 @@ script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 manifest=$script_dir/../manifests/oneplus6t-r0.psv
 fixes_root=${VIBEMARKET_FIXES_ROOT:-}
 camera_stage=
+display_stage=
 waydroid_stage=
 artifacts_root=
 camera_generation=r7-r5
+display_candidate=
+display_operation=install
 waydroid_candidate=
 evidence=${VIBEMARKET_EVIDENCE_DIR:-}
 acceptance_output=
@@ -19,14 +22,18 @@ usage() {
 	cat <<EOF
 Usage: $PROGRAM [options]
 
-Run the reviewed component installers for a native camera generation and/or
-Waydroid camera stage. Simulation is the default.
+Run the reviewed component installers for a native camera generation,
+display-kernel candidate and/or Waydroid camera stage. Simulation is the
+default.
 
   --fixes-root DIR       checked-out oneplus6t-pmos-fixes tree
   --camera-stage DIR     native APK generation stage
+  --display-stage DIR    display-kernel stage containing candidate/rollback
   --waydroid-stage DIR   Waydroid camera overlay stage
   --artifacts-root DIR   output directory from vibe-fetch-artifacts
   --camera-generation N  r7-r5 (default), r7-r6, r7-r7, r7-r10 or r7-r11 native manifest
+  --display-candidate N  r8-r9 below --artifacts-root
+  --display-operation N  install (default) or rollback
   --waydroid-candidate N select r37 or r38 below --artifacts-root
   --manifest FILE        VibeMarketOS manifest
   --evidence DIR         evidence directory for native package simulation
@@ -39,7 +46,8 @@ The command never reboots or touches partitions, firmware, boot slots or the
 bootloader. The fixes checkout must be clean and exactly match the revision
 pinned by the manifest. Stop Waydroid and close camera clients separately
 before --apply. With --artifacts-root, the native stage is selected
-automatically; add --waydroid-candidate to select a Waydroid stage as well.
+automatically; add --display-candidate and/or --waydroid-candidate to select
+additional stages.
 EOF
 }
 
@@ -60,6 +68,11 @@ while [ "$#" -gt 0 ]; do
 		camera_stage=$2
 		shift 2
 		;;
+	--display-stage)
+		[ "$#" -ge 2 ] || die '--display-stage requires a directory'
+		display_stage=$2
+		shift 2
+		;;
 	--waydroid-stage)
 		[ "$#" -ge 2 ] || die '--waydroid-stage requires a directory'
 		waydroid_stage=$2
@@ -73,6 +86,16 @@ while [ "$#" -gt 0 ]; do
 	--camera-generation)
 		[ "$#" -ge 2 ] || die '--camera-generation requires r7-r5, r7-r6, r7-r7, r7-r10 or r7-r11'
 		camera_generation=$2
+		shift 2
+		;;
+	--display-candidate)
+		[ "$#" -ge 2 ] || die '--display-candidate requires r8-r9'
+		display_candidate=$2
+		shift 2
+		;;
+	--display-operation)
+		[ "$#" -ge 2 ] || die '--display-operation requires install or rollback'
+		display_operation=$2
 		shift 2
 		;;
 	--waydroid-candidate)
@@ -115,6 +138,15 @@ r7-r5|r7-r6|r7-r7|r7-r10|r7-r11) ;;
 *) die "unsupported camera generation: $camera_generation (expected r7-r5, r7-r6, r7-r7, r7-r10 or r7-r11)" ;;
 esac
 
+case "$display_candidate" in
+''|r8-r9) ;;
+*) die 'unsupported display candidate: expected r8-r9' ;;
+esac
+case "$display_operation" in
+install|rollback) ;;
+*) die 'unsupported display operation: expected install or rollback' ;;
+esac
+
 [ -z "$waydroid_candidate" ] ||
 	case "$waydroid_candidate" in
 	r37|r38) ;;
@@ -124,6 +156,8 @@ esac
 if [ -n "$artifacts_root" ]; then
 	[ -d "$artifacts_root" ] || die "artifacts root is not a directory: $artifacts_root"
 	[ -n "$camera_stage" ] || camera_stage=$artifacts_root/native-camera-stage
+	[ -z "$display_candidate" ] || [ -n "$display_stage" ] || \
+		display_stage=$artifacts_root/display-kernel-stage-$display_candidate
 fi
 
 if [ -n "$waydroid_candidate" ]; then
@@ -133,11 +167,13 @@ if [ -n "$waydroid_candidate" ]; then
 		waydroid_stage=$artifacts_root/waydroid-camera-stage-$waydroid_candidate
 fi
 
-[ -n "$camera_stage" ] || [ -n "$waydroid_stage" ] || \
-	die 'provide --camera-stage and/or --waydroid-stage'
+[ -n "$camera_stage" ] || [ -n "$display_stage" ] || [ -n "$waydroid_stage" ] || \
+	die 'provide --camera-stage, --display-stage and/or --waydroid-stage'
 
 [ -z "$camera_stage" ] || [ -d "$camera_stage" ] || \
 	die "camera stage is not a directory: $camera_stage"
+[ -z "$display_stage" ] || [ -d "$display_stage" ] || \
+	die "display stage is not a directory: $display_stage"
 [ -z "$waydroid_stage" ] || [ -d "$waydroid_stage" ] || \
 	die "Waydroid stage is not a directory: $waydroid_stage"
 
@@ -181,6 +217,26 @@ if [ -n "$camera_stage" ]; then
 		set -- "$@" --apply
 	fi
 	"$manager" "$@"
+fi
+
+if [ -n "$display_stage" ]; then
+	display_manager=$fixes_root/scripts/manage-display-kernel
+	display_manifest=$fixes_root/data/display-kernel-r8-r9.psv
+	[ -x "$display_manager" ] || die "missing display kernel manager: $display_manager"
+	[ -r "$display_manifest" ] || die "missing display manifest: $display_manifest"
+	if [ -n "$evidence" ]; then
+		display_evidence=$evidence/display-kernel
+		mkdir -p "$display_evidence"
+	else
+		display_evidence=$(mktemp -d "${TMPDIR:-/tmp}/vibemarket-display.XXXXXX")
+	fi
+	set -- --stage "$display_stage" \
+		--manifest "$display_manifest" \
+		--evidence "$display_evidence" "$display_operation"
+	if [ "$apply" = yes ]; then
+		set -- "$@" --apply
+	fi
+	"$display_manager" "$@"
 fi
 
 if [ -n "$waydroid_stage" ]; then

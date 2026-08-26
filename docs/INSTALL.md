@@ -139,18 +139,18 @@ new manifest revision rather than installing from a dirty checkout.
 The development manifest currently pins:
 
 - `oneplus6t-pmos-fixes` at
-  `13baaa2dad0a91728dd429a373106c52eb0af958`, containing the libcamera r26
-  manual-exposure source candidate, package evidence and the composed pmaports
-  recipe; and
+  `e466f39cb2fb739d1c32613f7e6c77eddb6180cf`, containing the five-package
+  libcamera r26/manual-exposure source candidate, guarded generation manager,
+  package evidence and the composed pmaports recipe; and
 - Advanced Snapshot at
   `a39f13e213c13cc1eca51eea1d8ee05df6389983`, containing the r13 manual
   shutter/analogue-gain controls.
 
 These revisions are reproducible source checkpoints. The r13 AArch64 pair and
-matching libcamera r26/IPA and PipeWire r7 packages have been built and signed
-locally, but r13 is not yet a published or phone-accepted generation. The
-artifact fetcher below still publishes the earlier signed r7/r5 through r7/r11
-generations, which retain their own rollback and verification rules.
+matching libcamera r26/IPA and PipeWire r7 packages are published as the
+opt-in `camera-r26-r13` prerelease, but that generation is not yet phone-
+accepted. The artifact fetcher keeps the earlier signed r7/r5 through r7/r11
+generations available, and retains their own rollback and verification rules.
 
 ## Fetch the published camera stages
 
@@ -192,6 +192,13 @@ The r7/r11 bounded rear-flash candidate can be selected explicitly:
   --root /tmp/vibemarket-os-r0-artifacts --native r7-r11 --waydroid r37
 ```
 
+The opt-in lower-stack r26/r13 candidate can be selected explicitly:
+
+```sh
+./scripts/vibe-fetch-artifacts \
+  --root /tmp/vibemarket-os-r0-artifacts --native r26-r13 --waydroid r37
+```
+
 The display-kernel r8/r9 candidate can be fetched alongside the selected
 camera/Waydroid artifacts with `--display r8-r9`. It creates
 `display-kernel-stage-r8-r9`; the product installer selects it with
@@ -231,6 +238,10 @@ For the r7/r11 bounded rear-flash stage, use `--native r7-r11` while fetching
 and `--camera-generation r7-r11` while installing; its rollback is the r10 app
 pair and PipeWire remains r7. The Hardware flash switch is off by default and
 is limited to rear still captures.
+For the lower-stack r26/r13 stage, use `--native r26-r13` while fetching and
+`--camera-generation r26-r13` while installing; its rollback is the retained
+r24/r11 five-package stack. This candidate has host-side package evidence but
+still requires physical-device acceptance.
 
 The exact native bundle is the
 [camera-r7-r5 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r5).
@@ -242,5 +253,7 @@ The opt-in r7/r10 adjustment-safety bundle is the
 [camera-r7-r10 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r10).
 The opt-in r7/r11 bounded rear-flash bundle is the
 [camera-r7-r11 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r11).
+The opt-in lower-stack r26/r13 bundle is the
+[camera-r26-r13 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r26-r13).
 The two Waydroid candidates and their checksums are in the
 [Waydroid camera r37/r38 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/waydroid-camera-r37-r38).

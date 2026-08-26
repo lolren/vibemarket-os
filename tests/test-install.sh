@@ -35,6 +35,7 @@ touch "$fixes_root/data/camera-generation-r7-r5.psv"
 touch "$fixes_root/data/camera-generation-r7-r6.psv"
 touch "$fixes_root/data/camera-generation-r7-r7.psv"
 touch "$fixes_root/data/camera-generation-r7-r10.psv"
+touch "$fixes_root/data/camera-generation-r7-r11.psv"
 git -C "$fixes_root" add scripts data
 git -C "$fixes_root" commit --quiet -m initial
 revision=$(git -C "$fixes_root" rev-parse HEAD)
@@ -86,6 +87,12 @@ env $common_env "$INSTALL" --manifest "$manifest" --fixes-root "$fixes_root" \
 	--camera-stage "$artifacts_root/native-camera-stage" \
 	--evidence "$TEST_DIR/r7-r10-evidence" >"$TEST_DIR/r7-r10-report"
 grep -Fqx 'manager_called=yes' "$TEST_DIR/r7-r10-report"
+
+env $common_env "$INSTALL" --manifest "$manifest" --fixes-root "$fixes_root" \
+	--camera-generation r7-r11 \
+	--camera-stage "$artifacts_root/native-camera-stage" \
+	--evidence "$TEST_DIR/r7-r11-evidence" >"$TEST_DIR/r7-r11-report"
+grep -Fqx 'manager_called=yes' "$TEST_DIR/r7-r11-report"
 
 VIBEMARKET_COMPATIBLE_FILE="$compatible_file" \
 VIBEMARKET_WAYDROID_HEALTH_COMMAND="$health_command" \

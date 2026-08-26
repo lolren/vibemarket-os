@@ -92,6 +92,14 @@ The r7/r10 adjustment-safety candidate can be fetched explicitly as well:
   --root /tmp/vibemarket-os-r0-artifacts --native r7-r10 --waydroid r37
 ```
 
+The r7/r11 bounded rear-flash candidate can be fetched explicitly when the
+hardware flash helper is desired:
+
+```sh
+./scripts/vibe-fetch-artifacts \
+  --root /tmp/vibemarket-os-r0-artifacts --native r7-r11 --waydroid r37
+```
+
 The native stage is written to
 `/tmp/vibemarket-os-r0-artifacts/native-camera-stage`; the selected Waydroid
 stage is written to
@@ -106,6 +114,7 @@ The native bundle is published in the
 or the explicitly selected [camera-r7-r6 capture-safety candidate](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r6);
 the opt-in [camera-r7-r7 save-feedback candidate](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r7);
 the opt-in [camera-r7-r10 adjustment-safety candidate](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r10);
+the opt-in [camera-r7-r11 bounded rear-flash candidate](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r11);
 the Waydroid candidates are in the
 [Waydroid camera r37/r38 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/waydroid-camera-r37-r38).
 
@@ -136,6 +145,10 @@ review the newer save-feedback candidate.
 Pass `--camera-generation r7-r10` with the matching `--native r7-r10` stage to
 review the adjustment-serialization candidate. It keeps PipeWire r7 and
 rolls back to the r9 app pair.
+Pass `--camera-generation r7-r11` with the matching `--native r7-r11` stage to
+review the bounded rear-flash candidate. It keeps PipeWire r7 and rolls back
+to the r10 app pair; the Hardware flash switch is off by default and applies
+only to rear still captures.
 
 To run the bundled daily-use acceptance checks immediately after the applied
 transaction, add --acceptance-output /private/path/acceptance. The runner
@@ -168,6 +181,8 @@ The opt-in r7/r7 save-feedback stage is published in the
 [camera-r7-r7 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r7).
 The opt-in r7/r10 adjustment-safety stage is published in the
 [camera-r7-r10 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r10).
+The opt-in r7/r11 bounded rear-flash stage is published in the
+[camera-r7-r11 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r11).
 
 Optional Play Store/GAPPS setup is intentionally separate from the product
 installer because it changes the Waydroid system image. Follow the

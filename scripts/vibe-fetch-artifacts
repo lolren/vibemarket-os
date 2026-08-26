@@ -22,7 +22,7 @@ Options:
   --root DIRECTORY         new or empty host output directory
   --manifest FILE          VibeMarketOS source manifest
   --artifacts FILE         artifact manifest
-  --native r7-r5|r7-r6|r7-r7|r7-r10
+  --native r7-r5|r7-r6|r7-r7|r7-r10|r7-r11
                            native camera generation (default: r7-r5)
   --waydroid r37|r38|both  candidates to fetch (default: both)
   -h, --help               show this help
@@ -52,7 +52,7 @@ while [ "$#" -gt 0 ]; do
 		shift 2
 		;;
 	--native)
-		[ "$#" -ge 2 ] || die '--native requires r7-r5, r7-r6, r7-r7 or r7-r10'
+		[ "$#" -ge 2 ] || die '--native requires r7-r5, r7-r6, r7-r7, r7-r10 or r7-r11'
 		native_selection=$2
 		shift 2
 		;;
@@ -80,8 +80,8 @@ r37|r38|both) ;;
 *) die '--waydroid must be r37, r38 or both' ;;
 esac
 case "$native_selection" in
-r7-r5|r7-r6|r7-r7|r7-r10) ;;
-*) die '--native must be r7-r5, r7-r6, r7-r7 or r7-r10' ;;
+r7-r5|r7-r6|r7-r7|r7-r10|r7-r11) ;;
+*) die '--native must be r7-r5, r7-r6, r7-r7, r7-r10 or r7-r11' ;;
 esac
 
 for command in awk curl find grep mkdir sha256sum tar; do

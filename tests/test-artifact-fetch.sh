@@ -32,6 +32,11 @@ native_r7_r10_hash=$(sha256sum "$server/native-r7-r10.tar.gz" | awk '{ print $1 
 printf '%s  %s\n' "$native_r7_r10_hash" native-r7-r10.tar.gz \
 	>"$server/SHA256SUMS-r7-r10"
 native_r7_r10_sums_hash=$(sha256sum "$server/SHA256SUMS-r7-r10" | awk '{ print $1 }')
+cp "$server/native.tar.gz" "$server/native-r7-r11.tar.gz"
+native_r7_r11_hash=$(sha256sum "$server/native-r7-r11.tar.gz" | awk '{ print $1 }')
+printf '%s  %s\n' "$native_r7_r11_hash" native-r7-r11.tar.gz \
+	>"$server/SHA256SUMS-r7-r11"
+native_r7_r11_sums_hash=$(sha256sum "$server/SHA256SUMS-r7-r11" | awk '{ print $1 }')
 
 waydroid_source="$TEST_DIR/waydroid-source"
 mkdir -p "$waydroid_source/vendor"
@@ -80,6 +85,7 @@ printf '%s\n' \
 	"artifact|native|r7-r6|native-r7-r6.tar.gz|SHA256SUMS-r7-r6|$native_r7_r6_hash|$native_r7_r6_sums_hash|https://fixture/native" \
 	"artifact|native|r7-r7|native-r7-r7.tar.gz|SHA256SUMS-r7-r7|$native_r7_r7_hash|$native_r7_r7_sums_hash|https://fixture/native" \
 	"artifact|native|r7-r10|native-r7-r10.tar.gz|SHA256SUMS-r7-r10|$native_r7_r10_hash|$native_r7_r10_sums_hash|https://fixture/native" \
+	"artifact|native|r7-r11|native-r7-r11.tar.gz|SHA256SUMS-r7-r11|$native_r7_r11_hash|$native_r7_r11_sums_hash|https://fixture/native" \
 	"artifact|waydroid|r37|waydroid.tar.gz|waydroid.sha256|$waydroid_hash|$waydroid_sums_hash|https://fixture/waydroid" \
 	>"$artifact_manifest"
 
@@ -117,6 +123,14 @@ FIXTURE_SERVER="$server" PATH="$fakebin:$PATH" "$FETCH" \
 	--root "$output_r7_r10" >"$TEST_DIR/r7-r10-report"
 test -f "$output_r7_r10/native-camera-stage/native.txt"
 grep -Fqx 'result=pass' "$TEST_DIR/r7-r10-report"
+
+output_r7_r11="$TEST_DIR/output-r7-r11"
+FIXTURE_SERVER="$server" PATH="$fakebin:$PATH" "$FETCH" \
+	--manifest "$ROOT/manifests/oneplus6t-r0.psv" \
+	--artifacts "$artifact_manifest" --native r7-r11 --waydroid r37 \
+	--root "$output_r7_r11" >"$TEST_DIR/r7-r11-report"
+test -f "$output_r7_r11/native-camera-stage/native.txt"
+grep -Fqx 'result=pass' "$TEST_DIR/r7-r11-report"
 
 mkdir -p "$TEST_DIR/non-empty"
 printf '%s\n' occupied >"$TEST_DIR/non-empty/file"

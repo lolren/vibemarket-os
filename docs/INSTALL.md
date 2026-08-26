@@ -138,6 +138,13 @@ The r7/r10 adjustment-safety candidate can be selected explicitly:
   --root /tmp/vibemarket-os-r0-artifacts --native r7-r10 --waydroid r37
 ```
 
+The r7/r11 bounded rear-flash candidate can be selected explicitly:
+
+```sh
+./scripts/vibe-fetch-artifacts \
+  --root /tmp/vibemarket-os-r0-artifacts --native r7-r11 --waydroid r37
+```
+
 This creates `native-camera-stage` and
 `waydroid-camera-stage-r37` below the output directory. Use `--waydroid r38`
 for the alternate GPU candidate, or `--waydroid both` to fetch both. The
@@ -167,6 +174,10 @@ For the r7/r7 save-feedback stage, use `--native r7-r7` while fetching and
 For the r7/r10 adjustment-safety stage, use `--native r7-r10` while fetching
 and `--camera-generation r7-r10` while installing; its rollback is the r9 app
 pair and PipeWire remains r7.
+For the r7/r11 bounded rear-flash stage, use `--native r7-r11` while fetching
+and `--camera-generation r7-r11` while installing; its rollback is the r10 app
+pair and PipeWire remains r7. The Hardware flash switch is off by default and
+is limited to rear still captures.
 
 The exact native bundle is the
 [camera-r7-r5 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r5).
@@ -176,5 +187,7 @@ The opt-in r7/r7 save-feedback bundle is the
 [camera-r7-r7 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r7).
 The opt-in r7/r10 adjustment-safety bundle is the
 [camera-r7-r10 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r10).
+The opt-in r7/r11 bounded rear-flash bundle is the
+[camera-r7-r11 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r11).
 The two Waydroid candidates and their checksums are in the
 [Waydroid camera r37/r38 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/waydroid-camera-r37-r38).

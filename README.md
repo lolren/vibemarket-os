@@ -254,9 +254,10 @@ binary generations remain maintained in the pinned `oneplus6t-pmos-fixes`
 checkout.
 
 The published binary stages include the earlier r7/r5 through r7/r11
-generations and the opt-in r26/r13 candidate. The r26/r13 archive is signed
-and reproducibly hash-pinned, but remains uninstalled and unaccepted until
-physical-device validation completes; it is intentionally never the default.
+generations and the opt-in r26/r13 and r26/r14 candidates. Both lower-stack
+archives are signed and reproducibly hash-pinned, but remain uninstalled and
+unaccepted until physical-device validation completes; they are intentionally
+never the default.
 
 The matching development AArch64 camera stage is published in the
 [camera-r7-r5 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r5).

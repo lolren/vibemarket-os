@@ -154,7 +154,7 @@ new manifest revision rather than installing from a dirty checkout.
 The development manifest currently pins:
 
 - `oneplus6t-pmos-fixes` at
-  `750c98e613f4d559cdb10fc6c786b22b9e1bd3ac`, containing the five-package
+  `da1722e79e6b7329a68cb2bcd28d09f8fec16038`, containing the five-package
   libcamera r26/manual-exposure source candidate, guarded generation manager,
   package evidence and the composed pmaports recipe; and
 - Advanced Snapshot at

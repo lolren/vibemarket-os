@@ -64,9 +64,12 @@ Waydroid operations to the reviewed component helpers, and `--apply` is the
 only option that can change the phone:
 
 ```sh
-./scripts/vibe-install --camera-stage /path/to/camera-generation \
+fixes=/tmp/vibemarket-os-r0-sources/oneplus6t-pmos-fixes
+./scripts/vibe-install --fixes-root "$fixes" \
+  --camera-stage /path/to/camera-generation \
   --waydroid-stage /path/to/waydroid-camera-stage
-./scripts/vibe-install --camera-stage /path/to/camera-generation \
+./scripts/vibe-install --fixes-root "$fixes" \
+  --camera-stage /path/to/camera-generation \
   --waydroid-stage /path/to/waydroid-camera-stage --apply
 ```
 
@@ -80,6 +83,9 @@ The current manifest pins the native camera generation to PipeWire r7 with
 Advanced Snapshot r7 and the manifest-verified r7/r4 rollback. The exact
 package hashes, signing key and offline repository indexes are maintained in
 the pinned `oneplus6t-pmos-fixes` checkout.
+
+The matching development AArch64 camera stage is published in the
+[camera-r7-r5 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r5).
 
 Optional Play Store/GAPPS setup is intentionally separate from the product
 installer because it changes the Waydroid system image. Follow the

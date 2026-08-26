@@ -44,7 +44,9 @@ the [component display documentation](https://github.com/lolren/oneplus6t-pmos-f
 ## Simulate, then apply
 
 ```sh
+fixes=/tmp/vibemarket-os-r0-sources/oneplus6t-pmos-fixes
 ./scripts/vibe-install \
+  --fixes-root "$fixes" \
   --camera-stage /absolute/path/to/camera-generation \
   --waydroid-stage /absolute/path/to/waydroid-camera-stage
 ```

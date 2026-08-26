@@ -26,7 +26,7 @@ Waydroid camera stage. Simulation is the default.
   --camera-stage DIR     native APK generation stage
   --waydroid-stage DIR   Waydroid camera overlay stage
   --artifacts-root DIR   output directory from vibe-fetch-artifacts
-  --camera-generation N  r7-r5 (default), r7-r6 or r7-r7 native manifest
+  --camera-generation N  r7-r5 (default), r7-r6, r7-r7 or r7-r10 native manifest
   --waydroid-candidate N select r37 or r38 below --artifacts-root
   --manifest FILE        VibeMarketOS manifest
   --evidence DIR         evidence directory for native package simulation
@@ -71,7 +71,7 @@ while [ "$#" -gt 0 ]; do
 		shift 2
 		;;
 	--camera-generation)
-		[ "$#" -ge 2 ] || die '--camera-generation requires r7-r5, r7-r6 or r7-r7'
+		[ "$#" -ge 2 ] || die '--camera-generation requires r7-r5, r7-r6, r7-r7 or r7-r10'
 		camera_generation=$2
 		shift 2
 		;;
@@ -111,8 +111,8 @@ while [ "$#" -gt 0 ]; do
 done
 
 case "$camera_generation" in
-r7-r5|r7-r6|r7-r7) ;;
-*) die "unsupported camera generation: $camera_generation (expected r7-r5, r7-r6 or r7-r7)" ;;
+r7-r5|r7-r6|r7-r7|r7-r10) ;;
+*) die "unsupported camera generation: $camera_generation (expected r7-r5, r7-r6, r7-r7 or r7-r10)" ;;
 esac
 
 [ -z "$waydroid_candidate" ] ||

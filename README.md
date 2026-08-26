@@ -83,6 +83,13 @@ that generation:
   --root /tmp/vibemarket-os-r0-artifacts --native r7-r7 --waydroid r37
 ```
 
+The r7/r10 adjustment-safety candidate can be fetched explicitly as well:
+
+```sh
+./scripts/vibe-fetch-artifacts \
+  --root /tmp/vibemarket-os-r0-artifacts --native r7-r10 --waydroid r37
+```
+
 The native stage is written to
 `/tmp/vibemarket-os-r0-artifacts/native-camera-stage`; the selected Waydroid
 stage is written to
@@ -96,6 +103,7 @@ The native bundle is published in the
 [camera-r7-r5 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r5),
 or the explicitly selected [camera-r7-r6 capture-safety candidate](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r6);
 the opt-in [camera-r7-r7 save-feedback candidate](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r7);
+the opt-in [camera-r7-r10 adjustment-safety candidate](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r10);
 the Waydroid candidates are in the
 [Waydroid camera r37/r38 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/waydroid-camera-r37-r38).
 
@@ -123,6 +131,9 @@ pass `--camera-generation r7-r6` when the matching `--native r7-r6` stage has
 been fetched and you deliberately want to review the capture-safety candidate.
 Pass `--camera-generation r7-r7` with the matching `--native r7-r7` stage to
 review the newer save-feedback candidate.
+Pass `--camera-generation r7-r10` with the matching `--native r7-r10` stage to
+review the adjustment-serialization candidate. It keeps PipeWire r7 and
+rolls back to the r9 app pair.
 
 To run the bundled daily-use acceptance checks immediately after the applied
 transaction, add --acceptance-output /private/path/acceptance. The runner
@@ -153,6 +164,8 @@ The opt-in r7/r6 capture-safety stage is published in the
 [camera-r7-r6 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r6).
 The opt-in r7/r7 save-feedback stage is published in the
 [camera-r7-r7 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r7).
+The opt-in r7/r10 adjustment-safety stage is published in the
+[camera-r7-r10 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r10).
 
 Optional Play Store/GAPPS setup is intentionally separate from the product
 installer because it changes the Waydroid system image. Follow the

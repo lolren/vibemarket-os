@@ -39,8 +39,11 @@ The implementation remains in the component repositories:
 ## Quick start
 
 On the target phone, install the current `oneplus6t-pmos-fixes` package first
-so its read-only health and update helpers are available. Then run the
-product check as the normal user:
+so its daily-use, health and update helpers are available. The package now
+also provides `pmos-configure-daily-use`, which previews and then configures
+the carrier-neutral mobile data, network time and microphone-route service;
+see the component's [daily-use guide](https://github.com/lolren/oneplus6t-pmos-fixes/blob/main/docs/DAILY-USE.md).
+Then run the product check as the normal user:
 
 ```sh
 git clone https://github.com/lolren/vibemarket-os.git

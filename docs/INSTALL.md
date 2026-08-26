@@ -7,7 +7,8 @@ already boot postmarketOS and expose the normal user SSH/session tools.
 ## Requirements
 
 - OnePlus 6T with `/proc/device-tree/compatible` containing `oneplus,fajita`;
-- postmarketOS package tools and the `oneplus6t-pmos-fixes` helpers;
+- postmarketOS package tools and the `oneplus6t-pmos-fixes` helpers (including
+  the documented `pmos-configure-daily-use` setup command);
 - an exact, verified camera-generation stage when installing native camera
   packages;
 - an exact, verified display-kernel stage when testing the r9 panel candidate;

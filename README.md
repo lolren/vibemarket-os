@@ -198,8 +198,8 @@ is present.
 
 The current manifest pins
 `oneplus6t-pmos-fixes` at
-`06fa1cb8fc4882454c823d1438e7406f118f230d` and Advanced Snapshot at
-`2360fbffc1cef111bf25be2342dae798348a46c1`. These source revisions contain
+`c9c0beb889171605c443c8ced63be681ac62c3dd` and Advanced Snapshot at
+`eeff1da290bb97b8b50f38fb5493b8226c32b4d7`. These source revisions contain
 the libcamera r26 manual shutter/analogue-gain candidate and the Advanced
 Snapshot r13 UI/helper wiring. The exact package hashes, signing key and
 offline repository indexes for installable binary generations remain

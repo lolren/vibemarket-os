@@ -14,6 +14,11 @@ already boot postmarketOS and expose the normal user SSH/session tools.
   layer; and
 - a clean Waydroid preflight before any overlay access.
 
+Play Store/GAPPS initialization is optional and is not performed by
+vibe-install. If it is needed, use the documented, image-hash-aware
+[component procedure](https://github.com/lolren/oneplus6t-pmos-fixes/blob/main/docs/WAYDROID-GAPPS.md)
+before restoring the camera overlay.
+
 ## Check first
 
 ```sh

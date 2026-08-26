@@ -76,6 +76,12 @@ does not touch partitions, boot slots, firmware or the bootloader. A Waydroid
 overlay operation is refused while any rootfs mount or blocking I/O pressure
 is present.
 
+Optional Play Store/GAPPS setup is intentionally separate from the product
+installer because it changes the Waydroid system image. Follow the
+[component procedure](https://github.com/lolren/oneplus6t-pmos-fixes/blob/main/docs/WAYDROID-GAPPS.md),
+run its read-only package verifier afterward, and reapply the guarded camera
+overlay only after the health gate is clean.
+
 ## Update policy
 
 Run `pmos-safe-upgrade --simulate` for ordinary postmarketOS updates. If a

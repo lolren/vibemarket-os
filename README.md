@@ -67,6 +67,14 @@ candidates with hash verification:
   --root /tmp/vibemarket-os-r0-artifacts --waydroid r37
 ```
 
+That fetches the hardware-reviewed r7/r5 native stage. To fetch the newer
+capture-safety candidate instead, select it explicitly:
+
+```sh
+./scripts/vibe-fetch-artifacts \
+  --root /tmp/vibemarket-os-r0-artifacts --native r7-r6 --waydroid r37
+```
+
 The native stage is written to
 `/tmp/vibemarket-os-r0-artifacts/native-camera-stage`; the selected Waydroid
 stage is written to
@@ -77,7 +85,8 @@ manifest hashes recorded in
 [`data/oneplus6t-r0-artifacts.psv`](data/oneplus6t-r0-artifacts.psv), rejects
 unsafe archive paths, and refuses to overwrite a non-empty output directory.
 The native bundle is published in the
-[camera-r7-r5 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r5);
+[camera-r7-r5 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r5),
+or the explicitly selected [camera-r7-r6 capture-safety candidate](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r6);
 the Waydroid candidates are in the
 [Waydroid camera r37/r38 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/waydroid-camera-r37-r38).
 
@@ -100,7 +109,9 @@ fixes=/tmp/vibemarket-os-r0-sources/oneplus6t-pmos-fixes
 `vibe-fetch-artifacts`; `--waydroid-candidate r37` or `r38` additionally
 selects that exact Waydroid stage. Explicit `--camera-stage` and
 `--waydroid-stage` paths remain available for offline review or a custom
-verified stage.
+verified stage. `vibe-install` uses the r7/r5 native manifest by default;
+pass `--camera-generation r7-r6` when the matching `--native r7-r6` stage has
+been fetched and you deliberately want to review the capture-safety candidate.
 
 Before the second command, close camera applications and stop the Waydroid
 session/container as documented by the component repository. The installer
@@ -115,6 +126,8 @@ the pinned `oneplus6t-pmos-fixes` checkout.
 
 The matching development AArch64 camera stage is published in the
 [camera-r7-r5 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r5).
+The opt-in r7/r6 capture-safety stage is published in the
+[camera-r7-r6 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r6).
 
 Optional Play Store/GAPPS setup is intentionally separate from the product
 installer because it changes the Waydroid system image. Follow the

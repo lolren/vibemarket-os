@@ -17,6 +17,11 @@ tar -czf "$server/native.tar.gz" -C "$native_source" native.txt
 native_hash=$(sha256sum "$server/native.tar.gz" | awk '{ print $1 }')
 printf '%s  %s\n' "$native_hash" native.tar.gz >"$server/SHA256SUMS"
 native_sums_hash=$(sha256sum "$server/SHA256SUMS" | awk '{ print $1 }')
+cp "$server/native.tar.gz" "$server/native-r7-r6.tar.gz"
+native_r7_r6_hash=$(sha256sum "$server/native-r7-r6.tar.gz" | awk '{ print $1 }')
+printf '%s  %s\n' "$native_r7_r6_hash" native-r7-r6.tar.gz \
+	>"$server/SHA256SUMS-r7-r6"
+native_r7_r6_sums_hash=$(sha256sum "$server/SHA256SUMS-r7-r6" | awk '{ print $1 }')
 
 waydroid_source="$TEST_DIR/waydroid-source"
 mkdir -p "$waydroid_source/vendor"
@@ -62,6 +67,7 @@ artifact_manifest="$TEST_DIR/artifacts.psv"
 printf '%s\n' \
 	'schema|1' \
 	"artifact|native|r7-r5|native.tar.gz|SHA256SUMS|$native_hash|$native_sums_hash|https://fixture/native" \
+	"artifact|native|r7-r6|native-r7-r6.tar.gz|SHA256SUMS-r7-r6|$native_r7_r6_hash|$native_r7_r6_sums_hash|https://fixture/native" \
 	"artifact|waydroid|r37|waydroid.tar.gz|waydroid.sha256|$waydroid_hash|$waydroid_sums_hash|https://fixture/waydroid" \
 	>"$artifact_manifest"
 
@@ -75,6 +81,14 @@ FIXTURE_SERVER="$server" PATH="$fakebin:$PATH" "$FETCH" \
 test -f "$output/native-camera-stage/native.txt"
 test -f "$output/waydroid-camera-stage-r37/vendor/test.bin"
 grep -Fqx 'result=pass' "$TEST_DIR/report"
+
+output_r7_r6="$TEST_DIR/output-r7-r6"
+FIXTURE_SERVER="$server" PATH="$fakebin:$PATH" "$FETCH" \
+	--manifest "$ROOT/manifests/oneplus6t-r0.psv" \
+	--artifacts "$artifact_manifest" --native r7-r6 --waydroid r37 \
+	--root "$output_r7_r6" >"$TEST_DIR/r7-r6-report"
+test -f "$output_r7_r6/native-camera-stage/native.txt"
+grep -Fqx 'result=pass' "$TEST_DIR/r7-r6-report"
 
 mkdir -p "$TEST_DIR/non-empty"
 printf '%s\n' occupied >"$TEST_DIR/non-empty/file"

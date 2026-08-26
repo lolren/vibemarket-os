@@ -94,6 +94,14 @@ against the hashes committed in `data/oneplus6t-r0-artifacts.psv`:
   --root /tmp/vibemarket-os-r0-artifacts --waydroid r37
 ```
 
+The default native download is the r7/r5 stage. Select the newer capture-
+safety candidate explicitly when reviewing it:
+
+```sh
+./scripts/vibe-fetch-artifacts \
+  --root /tmp/vibemarket-os-r0-artifacts --native r7-r6 --waydroid r37
+```
+
 This creates `native-camera-stage` and
 `waydroid-camera-stage-r37` below the output directory. Use `--waydroid r38`
 for the alternate GPU candidate, or `--waydroid both` to fetch both. The
@@ -114,9 +122,14 @@ fixes=/tmp/vibemarket-os-r0-sources/oneplus6t-pmos-fixes
 The artifact-root form automatically selects the verified native stage and,
 when `--waydroid-candidate r37` or `r38` is supplied, the corresponding
 verified Waydroid stage. Explicit `--camera-stage` and `--waydroid-stage`
-paths are still supported when reviewing a custom stage.
+paths are still supported when reviewing a custom stage. The installer selects
+the r7/r5 native manifest by default. For the matching explicitly fetched r7/r6
+stage, add `--camera-generation r7-r6`; this selects the manifest whose
+rollback is the r7 app pair and does not alter PipeWire.
 
 The exact native bundle is the
 [camera-r7-r5 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r5).
+The opt-in capture-safety bundle is the
+[camera-r7-r6 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r6).
 The two Waydroid candidates and their checksums are in the
 [Waydroid camera r37/r38 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/waydroid-camera-r37-r38).

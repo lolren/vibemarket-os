@@ -8,6 +8,7 @@ fixes_root=${VIBEMARKET_FIXES_ROOT:-}
 camera_stage=
 waydroid_stage=
 artifacts_root=
+camera_generation=r7-r5
 waydroid_candidate=
 evidence=${VIBEMARKET_EVIDENCE_DIR:-}
 sudo_command=${VIBEMARKET_SUDO:-sudo}
@@ -24,6 +25,7 @@ Waydroid camera stage. Simulation is the default.
   --camera-stage DIR     native APK generation stage
   --waydroid-stage DIR   Waydroid camera overlay stage
   --artifacts-root DIR   output directory from vibe-fetch-artifacts
+  --camera-generation N  r7-r5 (default) or r7-r6 native manifest
   --waydroid-candidate N select r37 or r38 below --artifacts-root
   --manifest FILE        VibeMarketOS manifest
   --evidence DIR         evidence directory for native package simulation
@@ -65,6 +67,11 @@ while [ "$#" -gt 0 ]; do
 		artifacts_root=$2
 		shift 2
 		;;
+	--camera-generation)
+		[ "$#" -ge 2 ] || die '--camera-generation requires r7-r5 or r7-r6'
+		camera_generation=$2
+		shift 2
+		;;
 	--waydroid-candidate)
 		[ "$#" -ge 2 ] || die '--waydroid-candidate requires r37 or r38'
 		waydroid_candidate=$2
@@ -94,6 +101,11 @@ while [ "$#" -gt 0 ]; do
 		;;
 	esac
 done
+
+case "$camera_generation" in
+r7-r5|r7-r6) ;;
+*) die "unsupported camera generation: $camera_generation (expected r7-r5 or r7-r6)" ;;
+esac
 
 [ -z "$waydroid_candidate" ] ||
 	case "$waydroid_candidate" in
@@ -145,7 +157,7 @@ printf 'fixes_revision=%s\n' "$actual_fixes_revision"
 
 if [ -n "$camera_stage" ]; then
 	manager=$fixes_root/scripts/manage-camera-generation
-	generation_manifest=$fixes_root/data/camera-generation-r7-r5.psv
+	generation_manifest=$fixes_root/data/camera-generation-$camera_generation.psv
 	[ -x "$manager" ] || die "missing camera generation manager: $manager"
 	[ -r "$generation_manifest" ] || \
 		die "missing generation manifest: $generation_manifest"

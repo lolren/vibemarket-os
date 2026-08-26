@@ -11,8 +11,8 @@ phone still needs physical recovery and runtime acceptance after a Waydroid
 rootfs I/O deadlock; this repository does not claim that a camera bundle is
 installed or that Android camera performance is accepted. The current source
 pins include the libcamera r26 manual-exposure candidate and Advanced Snapshot
-r13, but those source changes still need a clean AArch64 package build and
-live-device acceptance before they can become an installable generation.
+r13; both now have clean AArch64 package evidence, but live-device acceptance
+is still required before they become an installable generation.
 
 ## What belongs here
 
@@ -198,7 +198,7 @@ is present.
 
 The current manifest pins
 `oneplus6t-pmos-fixes` at
-`92e5346c1187066b61ae37ffb1b2870d2ecaccd6` and Advanced Snapshot at
+`2357730ce527809ea1c4bd3df99b26dac3e7aee4` and Advanced Snapshot at
 `a0979d1ef0a9af223597c18bccca38c39ef465da`. These source revisions contain
 the libcamera r26 manual shutter/analogue-gain candidate and the Advanced
 Snapshot r13 UI/helper wiring. The exact package hashes, signing key and
@@ -206,10 +206,10 @@ offline repository indexes for installable binary generations remain
 maintained in the pinned `oneplus6t-pmos-fixes` checkout.
 
 The published binary camera stages below are still the earlier r7/r5 through
-r7/r11 generations. The r13 pair is now built and package-validated locally,
-but remains unpublished and uninstalled until the matching libcamera stack and
-physical-device validation complete; it is intentionally not offered through
-`vibe-fetch-artifacts` yet.
+r7/r11 generations. The r13 pair and matching libcamera r26/IPA and PipeWire
+r7 packages are now built and signed locally, but remain unpublished and
+uninstalled until physical-device validation completes; they are intentionally
+not offered through `vibe-fetch-artifacts` yet.
 
 The matching development AArch64 camera stage is published in the
 [camera-r7-r5 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r5).

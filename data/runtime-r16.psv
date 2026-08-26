@@ -1,0 +1,9 @@
+schema|1
+product|VibeMarketOS
+device|oneplus-fajita
+kind|runtime
+generation|r16
+package|oneplus6t-pmos-fixes-0.1.0-r16.apk|a83a42aedf40c595289151fd505805e0fe996b3ed552e3ab6d393472bf53e6f5
+checksums|SHA256SUMS|7a3505a18afffb3a68c29f11deb20f2f308cc6863654b246ad47ccc3497c4b82
+base_url|https://github.com/lolren/oneplus6t-pmos-fixes/releases/download/runtime-r16
+source_commit|75636dcb382b7832dedfde8296a4b22982e71d0f

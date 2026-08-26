@@ -21,6 +21,8 @@ supported.
 - `manifests/` records immutable source revisions and the product policy.
 - `scripts/vibe-check` validates the manifest and, on a phone, the device
   compatibility and optional Waydroid health gate.
+- `scripts/vibe-install-runtime` bootstraps the exact runtime helper package
+  with a pinned checksum before any other product operation.
 - `scripts/vibe-fetch` checks out every pinned source into a new work tree.
 - `scripts/vibe-install` composes the existing signed camera-generation and
   Waydroid installers without bypassing their rollback and mount checks. It
@@ -40,16 +42,33 @@ The implementation remains in the component repositories:
 
 ## Quick start
 
-On the target phone, install the current `oneplus6t-pmos-fixes` package first
-so its daily-use, health and update helpers are available. The package now
-also provides `pmos-configure-daily-use`, which previews and then configures
-the carrier-neutral mobile data, network time and microphone-route service;
-see the component's [daily-use guide](https://github.com/lolren/oneplus6t-pmos-fixes/blob/main/docs/DAILY-USE.md).
-Then run the product check as the normal user:
+On the target phone, clone this repository and bootstrap the exact reviewed
+runtime helper package. The first command is a device check; the second
+downloads and verifies the package before installing it:
 
 ```sh
 git clone https://github.com/lolren/vibemarket-os.git
 cd vibemarket-os
+./scripts/vibe-install-runtime
+./scripts/vibe-install-runtime --apply
+```
+
+The runtime package provides the daily-use, health and update helpers. It also
+provides `pmos-configure-daily-use`, which previews and then configures the
+carrier-neutral mobile data, network time and microphone-route service; see
+the component's [daily-use guide](https://github.com/lolren/oneplus6t-pmos-fixes/blob/main/docs/DAILY-USE.md).
+For an offline install, copy the exact APK and `SHA256SUMS` to the phone and
+pass both paths to the same command:
+
+```sh
+./scripts/vibe-install-runtime \
+  --package /path/oneplus6t-pmos-fixes-0.1.0-r16.apk \
+  --checksums /path/SHA256SUMS --apply
+```
+
+Then run the product check as the normal user:
+
+```sh
 ./scripts/vibe-check --manifest manifests/oneplus6t-r0.psv --require-device
 ```
 

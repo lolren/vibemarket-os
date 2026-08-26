@@ -1,0 +1,238 @@
+#!/bin/sh
+set -eu
+
+PROGRAM=${0##*/}
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+manifest=$script_dir/../data/runtime-r16.psv
+compatible_file=${VIBEMARKET_COMPATIBLE_FILE:-/proc/device-tree/compatible}
+package_file=
+checksums_file=
+work_dir=
+apply=no
+apk_command=${VIBEMARKET_APK:-apk}
+sudo_command=${VIBEMARKET_SUDO:-sudo}
+owned_work_dir=no
+
+usage() {
+	cat <<EOF
+Usage: $PROGRAM [options]
+
+Verify the pinned OnePlus 6T runtime APK and, with --apply, install it through
+the target's normal apk package manager. Simulation is the default.
+
+  --manifest FILE          runtime manifest (default: data/runtime-r16.psv)
+  --compatible-file FILE   device-tree compatible fixture or target file
+  --package FILE           already-downloaded APK (requires --checksums)
+  --checksums FILE         already-downloaded SHA256SUMS file
+  --work-dir DIRECTORY     empty directory for the downloaded files
+  --apply                  install the verified package
+  -h, --help               show this help
+
+The command accepts only the exact package name, release URL and hashes in the
+manifest. It never reboots, changes boot state, flashes partitions or changes
+repositories. Normal package dependencies are resolved by apk.
+EOF
+}
+
+die() {
+	printf '%s: %s\n' "$PROGRAM" "$*" >&2
+	exit 1
+}
+
+cleanup() {
+	if [ "$owned_work_dir" = yes ] && [ -n "${work_dir:-}" ]; then
+		rm -f -- "$work_dir/$package_name" "$work_dir/$checksums_name" 2>/dev/null || true
+		rmdir -- "$work_dir" 2>/dev/null || true
+	fi
+}
+trap cleanup EXIT HUP INT TERM
+
+while [ "$#" -gt 0 ]; do
+	case "$1" in
+	--manifest)
+		[ "$#" -ge 2 ] || die '--manifest requires a file'
+		manifest=$2
+		shift 2
+		;;
+	--compatible-file)
+		[ "$#" -ge 2 ] || die '--compatible-file requires a file'
+		compatible_file=$2
+		shift 2
+		;;
+	--package)
+		[ "$#" -ge 2 ] || die '--package requires a file'
+		package_file=$2
+		shift 2
+		;;
+	--checksums)
+		[ "$#" -ge 2 ] || die '--checksums requires a file'
+		checksums_file=$2
+		shift 2
+		;;
+	--work-dir)
+		[ "$#" -ge 2 ] || die '--work-dir requires a directory'
+		work_dir=$2
+		shift 2
+		;;
+	--apply)
+		apply=yes
+		shift
+		;;
+	--dry-run)
+		apply=no
+		shift
+		;;
+	-h|--help)
+		usage
+		exit 0
+		;;
+	*)
+		usage >&2
+		die "unknown argument: $1"
+		;;
+	esac
+done
+
+[ -r "$manifest" ] || die "runtime manifest is not readable: $manifest"
+[ -z "$package_file" ] || [ -n "$checksums_file" ] || \
+	die '--package requires --checksums'
+[ -z "$checksums_file" ] || [ -n "$package_file" ] || \
+	die '--checksums requires --package'
+
+for command in awk grep sha256sum tr; do
+	command -v "$command" >/dev/null 2>&1 || die "missing command: $command"
+done
+
+manifest_value() {
+	key=$1
+	awk -F '|' -v wanted="$key" \
+		'$1 == wanted { value=$2; count++ }
+		END { if (count != 1) exit 1; print value }' "$manifest"
+}
+
+schema=$(manifest_value schema) || die 'runtime manifest needs one schema row'
+[ "$schema" = 1 ] || die "unsupported runtime manifest schema: $schema"
+product=$(manifest_value product) || die 'runtime manifest needs one product row'
+[ "$product" = VibeMarketOS ] || die "unexpected product: $product"
+device=$(manifest_value device) || die 'runtime manifest needs one device row'
+[ "$device" = oneplus-fajita ] || die "unexpected device: $device"
+kind=$(manifest_value kind) || die 'runtime manifest needs one kind row'
+[ "$kind" = runtime ] || die "unexpected runtime kind: $kind"
+generation=$(manifest_value generation) || die 'runtime manifest needs one generation row'
+package_row=$(awk -F '|' '$1 == "package" { value=$0; count++ }
+	END { if (count != 1) exit 1; print value }' "$manifest") || \
+	die 'runtime manifest needs one package row'
+checksums_row=$(awk -F '|' '$1 == "checksums" { value=$0; count++ }
+	END { if (count != 1) exit 1; print value }' "$manifest") || \
+	die 'runtime manifest needs one checksums row'
+package_name=$(printf '%s\n' "$package_row" | awk -F '|' '{ print $2 }')
+package_hash=$(printf '%s\n' "$package_row" | awk -F '|' '{ print $3 }')
+checksums_name=$(printf '%s\n' "$checksums_row" | awk -F '|' '{ print $2 }')
+checksums_hash=$(printf '%s\n' "$checksums_row" | awk -F '|' '{ print $3 }')
+base_url=$(manifest_value base_url) || die 'runtime manifest needs one base_url row'
+source_commit=$(manifest_value source_commit) || \
+	die 'runtime manifest needs one source_commit row'
+
+validate_hash() {
+	value=$1
+	label=$2
+	printf '%s\n' "$value" | grep -Eq '^[0-9a-f]{64}$' || \
+		die "$label is not a SHA-256 digest: $value"
+}
+validate_filename() {
+	value=$1
+	label=$2
+	printf '%s\n' "$value" | grep -Eq '^[A-Za-z0-9][A-Za-z0-9._-]*$' || \
+		die "$label is not a safe filename: $value"
+}
+validate_hash "$package_hash" package
+validate_hash "$checksums_hash" checksums
+validate_filename "$package_name" package
+validate_filename "$checksums_name" checksums
+printf '%s\n' "$source_commit" | grep -Eq '^[0-9a-f]{40}$' || \
+	die 'runtime source_commit is not a full commit'
+case "$base_url" in
+https://*) ;;
+*) die "runtime base URL must use HTTPS: $base_url" ;;
+esac
+
+if [ ! -r "$compatible_file" ]; then
+	die "cannot verify OnePlus 6T compatibility: $compatible_file is unreadable"
+fi
+tr '\000' '\n' <"$compatible_file" | grep -Fxq oneplus,fajita || \
+	die 'device is not a OnePlus 6T (oneplus,fajita)'
+
+if [ -n "$package_file" ]; then
+	[ -r "$package_file" ] || die "package is not readable: $package_file"
+	[ "${package_file##*/}" = "$package_name" ] || \
+		die "package filename must be $package_name"
+	[ -r "$checksums_file" ] || \
+		die "checksums file is not readable: $checksums_file"
+	[ "${checksums_file##*/}" = "$checksums_name" ] || \
+		die "checksums filename must be $checksums_name"
+else
+	if [ "$apply" = no ]; then
+		printf 'report=vibemarket-runtime-bootstrap\n'
+		printf 'device_compatibility=pass\n'
+		printf 'generation=%s\n' "$generation"
+		printf 'package=%s\n' "$package_name"
+		printf 'package_sha256=%s\n' "$package_hash"
+		printf 'source_commit=%s\n' "$source_commit"
+		printf 'mode=simulate\n'
+		printf '%s\n' 'result=pass'
+		exit 0
+	fi
+	command -v curl >/dev/null 2>&1 || die 'curl is required to download the runtime package'
+	if [ -n "$work_dir" ]; then
+		[ -d "$work_dir" ] || die "work directory is not a directory: $work_dir"
+		[ -z "$(find "$work_dir" -mindepth 1 -maxdepth 1 -print -quit)" ] || \
+			die "refusing non-empty work directory: $work_dir"
+	else
+		work_dir=$(mktemp -d "${TMPDIR:-/tmp}/vibemarket-runtime.XXXXXX")
+		owned_work_dir=yes
+	fi
+	package_file=$work_dir/$package_name
+	checksums_file=$work_dir/$checksums_name
+	curl -fL --retry 2 --connect-timeout 15 --max-time 300 \
+		--output "$checksums_file" "$base_url/$checksums_name" || \
+		die 'runtime checksum manifest download failed'
+	curl -fL --retry 2 --connect-timeout 15 --max-time 300 \
+		--output "$package_file" "$base_url/$package_name" || \
+		die 'runtime package download failed'
+fi
+
+actual_checksums_hash=$(sha256sum "$checksums_file" | awk '{ print $1 }')
+[ "$actual_checksums_hash" = "$checksums_hash" ] || \
+	die "checksums hash mismatch: expected $checksums_hash, got $actual_checksums_hash"
+actual_package_hash=$(sha256sum "$package_file" | awk '{ print $1 }')
+[ "$actual_package_hash" = "$package_hash" ] || \
+	die "package hash mismatch: expected $package_hash, got $actual_package_hash"
+listed_package_hash=$(awk -v wanted="$package_name" \
+	'($2 == wanted || $2 == "*" wanted) { value=$1; count++ }
+	END { if (count != 1) exit 1; print value }' "$checksums_file") || \
+	die "checksums file does not list exactly $package_name"
+[ "$listed_package_hash" = "$package_hash" ] || \
+	die 'checksums file lists an unexpected package hash'
+
+if [ "$apply" = yes ]; then
+	command -v "$apk_command" >/dev/null 2>&1 || \
+		die "apk command not found: $apk_command"
+	if [ "$(id -u)" -eq 0 ]; then
+		"$apk_command" add --allow-untrusted "$package_file"
+	else
+		"$sudo_command" "$apk_command" add --allow-untrusted "$package_file"
+	fi
+	mode=apply
+else
+	mode=simulate
+fi
+
+printf 'report=vibemarket-runtime-bootstrap\n'
+printf 'device_compatibility=pass\n'
+printf 'generation=%s\n' "$generation"
+printf 'package=%s\n' "$package_name"
+printf 'package_sha256=%s\n' "$actual_package_hash"
+printf 'checksums_sha256=%s\n' "$actual_checksums_hash"
+printf 'source_commit=%s\n' "$source_commit"
+printf 'mode=%s\n' "$mode"
+printf '%s\n' 'result=pass'

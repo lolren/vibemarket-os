@@ -7,8 +7,9 @@ already boot postmarketOS and expose the normal user SSH/session tools.
 ## Requirements
 
 - OnePlus 6T with `/proc/device-tree/compatible` containing `oneplus,fajita`;
-- postmarketOS package tools and the `oneplus6t-pmos-fixes` helpers (including
-  the documented `pmos-configure-daily-use` setup command);
+- postmarketOS package tools; the exact runtime helper can be installed by
+  `scripts/vibe-install-runtime` (including the documented
+  `pmos-configure-daily-use` setup command);
 - an exact, verified camera-generation stage when installing native camera
   packages;
 - an exact, verified display-kernel stage when testing the r9 panel candidate;
@@ -32,10 +33,37 @@ The first command checks the manifest and device identity. The second also
 requires the read-only Waydroid mount/I/O gate. Both commands are safe to run
 while the phone is in normal use.
 
-If the phone exposes USB NCM and answers ping but SSH is unavailable, install
-the standalone [runtime-r16 helper package](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/runtime-r16)
-from the phone's local terminal after verifying its `SHA256SUMS` file, then
-run `sudo pmos-enable-ssh --apply`. The component's
+## Bootstrap the runtime helpers
+
+From this checkout on the phone, preview and then install the exact runtime
+package pinned in [`data/runtime-r16.psv`](../data/runtime-r16.psv):
+
+```sh
+./scripts/vibe-install-runtime
+./scripts/vibe-install-runtime --apply
+```
+
+The apply command verifies the HTTPS checksum manifest, the APK hash and the
+OnePlus 6T device-tree compatible string before calling `apk add
+--allow-untrusted`. It does not add a repository, reboot or touch boot state.
+The package's ordinary dependencies are resolved from the configured pMOS
+repositories. If the phone cannot download, copy both release files locally
+and use:
+
+```sh
+./scripts/vibe-install-runtime \
+  --package /path/oneplus6t-pmos-fixes-0.1.0-r16.apk \
+  --checksums /path/SHA256SUMS --apply
+```
+
+The release and source-build details are maintained in the component's
+[runtime package documentation](https://github.com/lolren/oneplus6t-pmos-fixes/blob/main/packaging/README.md).
+
+If the phone exposes USB NCM and answers ping but SSH is unavailable, run the
+bootstrap command from the phone's local terminal, then enable SSH with
+`sudo pmos-enable-ssh --apply`. The bootstrap verifies the standalone
+[runtime-r16 helper package](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/runtime-r16)
+before installation. The component's
 [transport recovery guide](https://github.com/lolren/oneplus6t-pmos-fixes/blob/main/docs/TRANSPORT.md)
 also documents the direct systemd/OpenRC fallback.
 

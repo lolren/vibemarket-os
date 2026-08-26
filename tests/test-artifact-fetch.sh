@@ -1,0 +1,90 @@
+#!/bin/sh
+set -eu
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+FETCH=$ROOT/scripts/vibe-fetch-artifacts
+TEST_DIR=$(mktemp -d "${TMPDIR:-/tmp}/vibemarket-artifacts.XXXXXX")
+trap 'rm -rf "$TEST_DIR"' EXIT HUP INT TERM
+
+server="$TEST_DIR/server"
+fakebin="$TEST_DIR/bin"
+mkdir -p "$server" "$fakebin"
+
+native_source="$TEST_DIR/native-source"
+mkdir -p "$native_source"
+printf '%s\n' native-fixture >"$native_source/native.txt"
+tar -czf "$server/native.tar.gz" -C "$native_source" native.txt
+native_hash=$(sha256sum "$server/native.tar.gz" | awk '{ print $1 }')
+printf '%s  %s\n' "$native_hash" native.tar.gz >"$server/SHA256SUMS"
+native_sums_hash=$(sha256sum "$server/SHA256SUMS" | awk '{ print $1 }')
+
+waydroid_source="$TEST_DIR/waydroid-source"
+mkdir -p "$waydroid_source/vendor"
+printf '%s\n' waydroid-fixture >"$waydroid_source/vendor/test.bin"
+tar -czf "$server/waydroid.tar.gz" -C "$waydroid_source" vendor/test.bin
+waydroid_hash=$(sha256sum "$server/waydroid.tar.gz" | awk '{ print $1 }')
+waydroid_file_hash=$(sha256sum "$waydroid_source/vendor/test.bin" | awk '{ print $1 }')
+printf '%s  %s\n' "$waydroid_file_hash" vendor/test.bin >"$server/waydroid.sha256"
+waydroid_sums_hash=$(sha256sum "$server/waydroid.sha256" | awk '{ print $1 }')
+
+cat >"$fakebin/curl" <<'EOF'
+#!/bin/sh
+set -eu
+
+output=
+url=
+while [ "$#" -gt 0 ]; do
+	case "$1" in
+	--output)
+		output=$2
+		shift 2
+		;;
+	--retry|--connect-timeout|--max-time)
+		shift 2
+		;;
+	-*)
+		shift
+		;;
+	*)
+		url=$1
+		shift
+		;;
+	esac
+done
+
+[ -n "$output" ]
+[ -n "$url" ]
+cp "$FIXTURE_SERVER/${url##*/}" "$output"
+EOF
+chmod +x "$fakebin/curl"
+
+artifact_manifest="$TEST_DIR/artifacts.psv"
+printf '%s\n' \
+	'schema|1' \
+	"artifact|native|r7-r5|native.tar.gz|SHA256SUMS|$native_hash|$native_sums_hash|https://fixture/native" \
+	"artifact|waydroid|r37|waydroid.tar.gz|waydroid.sha256|$waydroid_hash|$waydroid_sums_hash|https://fixture/waydroid" \
+	>"$artifact_manifest"
+
+output="$TEST_DIR/output"
+FIXTURE_SERVER="$server" PATH="$fakebin:$PATH" "$FETCH" \
+	--manifest "$ROOT/manifests/oneplus6t-r0.psv" \
+	--artifacts "$artifact_manifest" \
+	--waydroid r37 \
+	--root "$output" >"$TEST_DIR/report"
+
+test -f "$output/native-camera-stage/native.txt"
+test -f "$output/waydroid-camera-stage-r37/vendor/test.bin"
+grep -Fqx 'result=pass' "$TEST_DIR/report"
+
+mkdir -p "$TEST_DIR/non-empty"
+printf '%s\n' occupied >"$TEST_DIR/non-empty/file"
+if FIXTURE_SERVER="$server" PATH="$fakebin:$PATH" "$FETCH" \
+	--manifest "$ROOT/manifests/oneplus6t-r0.psv" \
+	--artifacts "$artifact_manifest" \
+	--waydroid r37 \
+	--root "$TEST_DIR/non-empty" >"$TEST_DIR/non-empty-report" 2>&1; then
+	exit 1
+fi
+grep -Fq 'refusing non-empty root' "$TEST_DIR/non-empty-report"
+
+printf '%s\n' 'artifact fetch tests passed'

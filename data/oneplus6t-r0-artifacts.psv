@@ -1,0 +1,4 @@
+schema|1
+artifact|native|r7-r5|oneplus6t-camera-r7-r5-aarch64.tar.gz|SHA256SUMS|d3f637a4fa54186d853f48e13b0ea97725be16805549338ed6977c32e992b0d4|4c148576f39cafcc4982b77dc41044efb79de88894a6dfdebfe9b753caac3104|https://github.com/lolren/oneplus6t-pmos-fixes/releases/download/camera-r7-r5
+artifact|waydroid|r37|waydroid-camera-rgb-r37-gpu.tar.gz|waydroid-camera-rgb-r37-gpu.sha256|88a9f2be8ac90f58c0428d82bd71ca4751636a56cc883bd8ecdd22ca87d14b3e|46256be3808f91306daa32338aaddda25594067ef9dbebe89bbaeddcad36184a|https://github.com/lolren/oneplus6t-pmos-fixes/releases/download/waydroid-camera-r37-r38
+artifact|waydroid|r38|waydroid-camera-rgb-r38-gpu.tar.gz|waydroid-camera-rgb-r38-gpu.sha256|045962846fa9bc21aedbf8e62b33c332aba1ba847f1f5c7aacd298e6f6055df6|15c9f9ec2b1663dbf1a380b8ada4129305b097ae2bde86705dafa44a6049462e|https://github.com/lolren/oneplus6t-pmos-fixes/releases/download/waydroid-camera-r37-r38

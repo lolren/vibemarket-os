@@ -82,3 +82,36 @@ Fetch a matching source tree with:
 Then pass `/tmp/vibemarket-os-r0-sources/oneplus6t-pmos-fixes` as
 `--fixes-root`. If you intentionally change a component, create and review a
 new manifest revision rather than installing from a dirty checkout.
+
+## Fetch the published camera stages
+
+The source checkout and binary camera stages are separate. Fetch the exact
+published stages on the development host; the helper verifies every download
+against the hashes committed in `data/oneplus6t-r0-artifacts.psv`:
+
+```sh
+./scripts/vibe-fetch-artifacts \
+  --root /tmp/vibemarket-os-r0-artifacts --waydroid r37
+```
+
+This creates `native-camera-stage` and
+`waydroid-camera-stage-r37` below the output directory. Use `--waydroid r38`
+for the alternate GPU candidate, or `--waydroid both` to fetch both. The
+helper requires curl, tar and sha256sum, uses HTTPS-only release URLs, checks
+the native package manifest and the Waydroid internal file manifest, rejects
+unsafe tar paths, and never contacts or modifies the phone.
+
+Use the resulting stages with the simulation first:
+
+```sh
+fixes=/tmp/vibemarket-os-r0-sources/oneplus6t-pmos-fixes
+./scripts/vibe-install \
+  --fixes-root "$fixes" \
+  --camera-stage /tmp/vibemarket-os-r0-artifacts/native-camera-stage \
+  --waydroid-stage /tmp/vibemarket-os-r0-artifacts/waydroid-camera-stage-r37
+```
+
+The exact native bundle is the
+[camera-r7-r5 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r5).
+The two Waydroid candidates and their checksums are in the
+[Waydroid camera r37/r38 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/waydroid-camera-r37-r38).

@@ -59,6 +59,28 @@ Fetch the exact source revisions on a development host:
   --root /tmp/vibemarket-os-r0-sources
 ```
 
+Fetch the exact published native camera bundle and one or both Waydroid camera
+candidates with hash verification:
+
+```sh
+./scripts/vibe-fetch-artifacts \
+  --root /tmp/vibemarket-os-r0-artifacts --waydroid r37
+```
+
+The native stage is written to
+`/tmp/vibemarket-os-r0-artifacts/native-camera-stage`; the selected Waydroid
+stage is written to
+`/tmp/vibemarket-os-r0-artifacts/waydroid-camera-stage-r37`. Use
+`--waydroid r38` for the alternate GPU candidate or `--waydroid both` to fetch
+both. The script accepts only HTTPS URLs, verifies the archive and checksum
+manifest hashes recorded in
+[`data/oneplus6t-r0-artifacts.psv`](data/oneplus6t-r0-artifacts.psv), rejects
+unsafe archive paths, and refuses to overwrite a non-empty output directory.
+The native bundle is published in the
+[camera-r7-r5 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r5);
+the Waydroid candidates are in the
+[Waydroid camera r37/r38 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/waydroid-camera-r37-r38).
+
 The default product installer is simulation-only. It delegates package and
 Waydroid operations to the reviewed component helpers, and `--apply` is the
 only option that can change the phone:
@@ -66,11 +88,12 @@ only option that can change the phone:
 ```sh
 fixes=/tmp/vibemarket-os-r0-sources/oneplus6t-pmos-fixes
 ./scripts/vibe-install --fixes-root "$fixes" \
-  --camera-stage /path/to/camera-generation \
-  --waydroid-stage /path/to/waydroid-camera-stage
+  --camera-stage /tmp/vibemarket-os-r0-artifacts/native-camera-stage \
+  --waydroid-stage /tmp/vibemarket-os-r0-artifacts/waydroid-camera-stage-r37
 ./scripts/vibe-install --fixes-root "$fixes" \
-  --camera-stage /path/to/camera-generation \
-  --waydroid-stage /path/to/waydroid-camera-stage --apply
+  --camera-stage /tmp/vibemarket-os-r0-artifacts/native-camera-stage \
+  --waydroid-stage /tmp/vibemarket-os-r0-artifacts/waydroid-camera-stage-r37 \
+  --apply
 ```
 
 Before the second command, close camera applications and stop the Waydroid

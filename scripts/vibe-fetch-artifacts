@@ -1,0 +1,205 @@
+#!/bin/sh
+set -eu
+
+PROGRAM=$(basename "$0")
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+manifest=$script_dir/../manifests/oneplus6t-r0.psv
+artifacts_file=$script_dir/../data/oneplus6t-r0-artifacts.psv
+root=
+waydroid_selection=both
+
+usage() {
+	cat <<EOF
+Usage: $PROGRAM --root DIRECTORY [options]
+
+Download and verify the exact native camera and Waydroid candidate artifacts
+recorded by a VibeMarketOS artifact manifest, then extract fresh stages.
+This command changes only the host output directory; it never contacts the
+phone or runs a phone installer.
+
+Options:
+  --root DIRECTORY         new or empty host output directory
+  --manifest FILE          VibeMarketOS source manifest
+  --artifacts FILE         artifact manifest
+  --waydroid r37|r38|both  candidates to fetch (default: both)
+  -h, --help               show this help
+EOF
+}
+
+die() {
+	printf '%s: %s\n' "$PROGRAM" "$*" >&2
+	exit 1
+}
+
+while [ "$#" -gt 0 ]; do
+	case "$1" in
+	--root)
+		[ "$#" -ge 2 ] || die '--root requires a directory'
+		root=$2
+		shift 2
+		;;
+	--manifest)
+		[ "$#" -ge 2 ] || die '--manifest requires a file'
+		manifest=$2
+		shift 2
+		;;
+	--artifacts)
+		[ "$#" -ge 2 ] || die '--artifacts requires a file'
+		artifacts_file=$2
+		shift 2
+		;;
+	--waydroid)
+		[ "$#" -ge 2 ] || die '--waydroid requires r37, r38 or both'
+		waydroid_selection=$2
+		shift 2
+		;;
+	-h|--help)
+		usage
+		exit 0
+		;;
+	*)
+		usage >&2
+		die "unknown argument: $1"
+		;;
+	esac
+done
+
+[ -n "$root" ] || die '--root is required'
+[ -r "$manifest" ] || die "manifest is not readable: $manifest"
+[ -r "$artifacts_file" ] || die "artifact manifest is not readable: $artifacts_file"
+case "$waydroid_selection" in
+r37|r38|both) ;;
+*) die '--waydroid must be r37, r38 or both' ;;
+esac
+
+for command in awk curl find grep mkdir sha256sum tar; do
+	command -v "$command" >/dev/null 2>&1 || die "$command is required"
+done
+
+if [ -e "$root" ]; then
+	[ -d "$root" ] || die "root is not a directory: $root"
+	[ -z "$(find "$root" -mindepth 1 -maxdepth 1 -print -quit)" ] || \
+		die "refusing non-empty root: $root"
+else
+	mkdir -p "$root"
+fi
+
+artifact_row() {
+	kind=$1
+	generation=$2
+	awk -F'|' -v wanted_kind="$kind" -v wanted_generation="$generation" \
+		'$1 == "artifact" && $2 == wanted_kind && $3 == wanted_generation {
+			print
+			count++
+		}
+		END { if (count != 1) exit 1 }' "$artifacts_file"
+}
+
+validate_hex() {
+	value=$1
+	label=$2
+	printf '%s\n' "$value" | grep -Eq '^[0-9a-f]{64}$' || \
+		die "$label is not a SHA-256 digest: $value"
+}
+
+validate_filename() {
+	value=$1
+	label=$2
+	printf '%s\n' "$value" | grep -Eq '^[A-Za-z0-9][A-Za-z0-9._-]*$' || \
+		die "$label is not a safe filename: $value"
+}
+
+download() {
+	url=$1
+	destination=$2
+	expected=$3
+	[ ! -e "$destination" ] || die "refusing to overwrite: $destination"
+	mkdir -p "$(dirname -- "$destination")"
+	curl -fL --retry 2 --connect-timeout 15 --max-time 300 \
+		--output "$destination" "$url" || die "download failed: $url"
+	actual=$(sha256sum "$destination" | awk '{ print $1 }')
+	[ "$actual" = "$expected" ] || \
+		die "hash mismatch for $destination: expected $expected, got $actual"
+	printf 'downloaded=%s\n' "$destination"
+}
+
+safe_extract() {
+	archive=$1
+	destination=$2
+	mkdir -p "$destination"
+	entries=$(tar -tzf "$archive") || die "cannot inspect archive: $archive"
+	if printf '%s\n' "$entries" | awk \
+		'/^\// || /(^|\/)\.\.(\/|$)/ { bad=1 }
+		END { exit bad ? 0 : 1 }'; then
+		die "unsafe path in archive: $archive"
+	fi
+	tar -xzf "$archive" -C "$destination"
+}
+
+fetch_artifact() {
+	row=$1
+	kind=$(printf '%s\n' "$row" | awk -F'|' '{ print $2 }')
+	generation=$(printf '%s\n' "$row" | awk -F'|' '{ print $3 }')
+	archive=$(printf '%s\n' "$row" | awk -F'|' '{ print $4 }')
+	checksums=$(printf '%s\n' "$row" | awk -F'|' '{ print $5 }')
+	archive_hash=$(printf '%s\n' "$row" | awk -F'|' '{ print $6 }')
+	checksums_hash=$(printf '%s\n' "$row" | awk -F'|' '{ print $7 }')
+	base_url=$(printf '%s\n' "$row" | awk -F'|' '{ print $8 }')
+	validate_filename "$archive" "$kind/$generation archive"
+	validate_filename "$checksums" "$kind/$generation manifest"
+	validate_hex "$archive_hash" "$kind/$generation archive"
+	validate_hex "$checksums_hash" "$kind/$generation manifest"
+	case "$base_url" in
+	http://*|https://*) ;;
+	*) die "invalid artifact base URL: $base_url" ;;
+	esac
+	artifact_dir=$root/$kind-$generation
+	[ ! -e "$artifact_dir" ] || die "refusing to overwrite: $artifact_dir"
+	mkdir -p "$artifact_dir"
+	download "$base_url/$archive" "$artifact_dir/$archive" "$archive_hash"
+	download "$base_url/$checksums" "$artifact_dir/$checksums" "$checksums_hash"
+	case "$kind" in
+	native)
+		( cd "$artifact_dir" && sha256sum -c "$checksums" ) || \
+			die 'native package manifest failed'
+		stage=$root/native-camera-stage
+		;;
+	waydroid)
+		stage=$root/waydroid-camera-stage-$generation
+		;;
+	*) die "unsupported artifact kind: $kind" ;;
+	esac
+	safe_extract "$artifact_dir/$archive" "$stage"
+	if [ "$kind" = waydroid ]; then
+		( cd "$stage" && sha256sum -c "$artifact_dir/$checksums" ) || \
+			die "Waydroid package manifest failed for $generation"
+	fi
+	printf 'stage=%s\n' "$stage"
+}
+
+native_row=$(artifact_row native r7-r5) || \
+	die 'artifact manifest needs one native r7-r5 row'
+fetch_artifact "$native_row"
+
+case "$waydroid_selection" in
+r37)
+	waydroid_row=$(artifact_row waydroid r37) || \
+		die 'artifact manifest needs one Waydroid r37 row'
+	fetch_artifact "$waydroid_row"
+	;;
+r38)
+	waydroid_row=$(artifact_row waydroid r38) || \
+		die 'artifact manifest needs one Waydroid r38 row'
+	fetch_artifact "$waydroid_row"
+	;;
+both)
+	waydroid_row=$(artifact_row waydroid r37) || \
+		die 'artifact manifest needs one Waydroid r37 row'
+	fetch_artifact "$waydroid_row"
+	waydroid_row=$(artifact_row waydroid r38) || \
+		die 'artifact manifest needs one Waydroid r38 row'
+	fetch_artifact "$waydroid_row"
+	;;
+esac
+
+printf 'result=pass\n'

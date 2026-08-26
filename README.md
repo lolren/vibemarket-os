@@ -97,6 +97,10 @@ The OnePlus display/brightness static report is also provided by the fixes
 component; use its read-only `pmos-check-display` procedure after recovery
 before proposing a kernel or panel change. See the [display diagnostic
 documentation](https://github.com/lolren/oneplus6t-pmos-fixes/blob/main/docs/DISPLAY.md).
+For host-side USB recovery evidence, run the pinned checkout's
+[`check-device-transport`](https://github.com/lolren/oneplus6t-pmos-fixes/blob/main/docs/TRANSPORT.md)
+report. CDC-NCM, ADB and fastboot are distinct transports; an empty fastboot
+listing while CDC-NCM is present does not prove a cable fault.
 The complete implementation/device-acceptance audit is maintained in the
 [fixes status matrix](https://github.com/lolren/oneplus6t-pmos-fixes/blob/main/docs/STATUS-MATRIX.md).
 

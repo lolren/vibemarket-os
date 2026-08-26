@@ -40,6 +40,10 @@ pmos-check-display --output /tmp/oneplus6t-display-report.txt
 It records DRM connector/mode, backlight and filtered display-kernel evidence
 without changing the display. The full procedure and interpretation are in
 the [component display documentation](https://github.com/lolren/oneplus6t-pmos-fixes/blob/main/docs/DISPLAY.md).
+If USB recovery is unclear, run the host-side
+[`check-device-transport`](https://github.com/lolren/oneplus6t-pmos-fixes/blob/main/docs/TRANSPORT.md)
+report from the pinned fixes checkout. It is read-only and distinguishes the
+CDC-NCM, ADB and fastboot transports before any recovery action is considered.
 
 ## Simulate, then apply
 

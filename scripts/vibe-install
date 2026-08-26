@@ -7,6 +7,8 @@ manifest=$script_dir/../manifests/oneplus6t-r0.psv
 fixes_root=${VIBEMARKET_FIXES_ROOT:-}
 camera_stage=
 waydroid_stage=
+artifacts_root=
+waydroid_candidate=
 evidence=${VIBEMARKET_EVIDENCE_DIR:-}
 sudo_command=${VIBEMARKET_SUDO:-sudo}
 apply=no
@@ -21,6 +23,8 @@ Waydroid camera stage. Simulation is the default.
   --fixes-root DIR       checked-out oneplus6t-pmos-fixes tree
   --camera-stage DIR     native APK generation stage
   --waydroid-stage DIR   Waydroid camera overlay stage
+  --artifacts-root DIR   output directory from vibe-fetch-artifacts
+  --waydroid-candidate N select r37 or r38 below --artifacts-root
   --manifest FILE        VibeMarketOS manifest
   --evidence DIR         evidence directory for native package simulation
   --apply                apply after all safety checks; otherwise simulate
@@ -29,7 +33,8 @@ Waydroid camera stage. Simulation is the default.
 The command never reboots or touches partitions, firmware, boot slots or the
 bootloader. The fixes checkout must be clean and exactly match the revision
 pinned by the manifest. Stop Waydroid and close camera clients separately
-before --apply.
+before --apply. With --artifacts-root, the native stage is selected
+automatically; add --waydroid-candidate to select a Waydroid stage as well.
 EOF
 }
 
@@ -53,6 +58,16 @@ while [ "$#" -gt 0 ]; do
 	--waydroid-stage)
 		[ "$#" -ge 2 ] || die '--waydroid-stage requires a directory'
 		waydroid_stage=$2
+		shift 2
+		;;
+	--artifacts-root)
+		[ "$#" -ge 2 ] || die '--artifacts-root requires a directory'
+		artifacts_root=$2
+		shift 2
+		;;
+	--waydroid-candidate)
+		[ "$#" -ge 2 ] || die '--waydroid-candidate requires r37 or r38'
+		waydroid_candidate=$2
 		shift 2
 		;;
 	--manifest)
@@ -80,8 +95,31 @@ while [ "$#" -gt 0 ]; do
 	esac
 done
 
+[ -z "$waydroid_candidate" ] ||
+	case "$waydroid_candidate" in
+	r37|r38) ;;
+	*) die "unsupported Waydroid candidate: $waydroid_candidate (expected r37 or r38)" ;;
+	esac
+
+if [ -n "$artifacts_root" ]; then
+	[ -d "$artifacts_root" ] || die "artifacts root is not a directory: $artifacts_root"
+	[ -n "$camera_stage" ] || camera_stage=$artifacts_root/native-camera-stage
+fi
+
+if [ -n "$waydroid_candidate" ]; then
+	[ -n "$artifacts_root" ] ||
+		die '--waydroid-candidate requires --artifacts-root'
+	[ -n "$waydroid_stage" ] || \
+		waydroid_stage=$artifacts_root/waydroid-camera-stage-$waydroid_candidate
+fi
+
 [ -n "$camera_stage" ] || [ -n "$waydroid_stage" ] || \
 	die 'provide --camera-stage and/or --waydroid-stage'
+
+[ -z "$camera_stage" ] || [ -d "$camera_stage" ] || \
+	die "camera stage is not a directory: $camera_stage"
+[ -z "$waydroid_stage" ] || [ -d "$waydroid_stage" ] || \
+	die "Waydroid stage is not a directory: $waydroid_stage"
 
 [ -n "$fixes_root" ] || die '--fixes-root is required for component installers'
 [ -d "$fixes_root" ] || die "fixes root is not a directory: $fixes_root"

@@ -88,13 +88,19 @@ only option that can change the phone:
 ```sh
 fixes=/tmp/vibemarket-os-r0-sources/oneplus6t-pmos-fixes
 ./scripts/vibe-install --fixes-root "$fixes" \
-  --camera-stage /tmp/vibemarket-os-r0-artifacts/native-camera-stage \
-  --waydroid-stage /tmp/vibemarket-os-r0-artifacts/waydroid-camera-stage-r37
+  --artifacts-root /tmp/vibemarket-os-r0-artifacts \
+  --waydroid-candidate r37
 ./scripts/vibe-install --fixes-root "$fixes" \
-  --camera-stage /tmp/vibemarket-os-r0-artifacts/native-camera-stage \
-  --waydroid-stage /tmp/vibemarket-os-r0-artifacts/waydroid-camera-stage-r37 \
+  --artifacts-root /tmp/vibemarket-os-r0-artifacts \
+  --waydroid-candidate r37 \
   --apply
 ```
+
+`--artifacts-root` selects the native stage produced by
+`vibe-fetch-artifacts`; `--waydroid-candidate r37` or `r38` additionally
+selects that exact Waydroid stage. Explicit `--camera-stage` and
+`--waydroid-stage` paths remain available for offline review or a custom
+verified stage.
 
 Before the second command, close camera applications and stop the Waydroid
 session/container as documented by the component repository. The installer

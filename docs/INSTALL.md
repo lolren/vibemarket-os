@@ -51,8 +51,8 @@ CDC-NCM, ADB and fastboot transports before any recovery action is considered.
 fixes=/tmp/vibemarket-os-r0-sources/oneplus6t-pmos-fixes
 ./scripts/vibe-install \
   --fixes-root "$fixes" \
-  --camera-stage /absolute/path/to/camera-generation \
-  --waydroid-stage /absolute/path/to/waydroid-camera-stage
+  --artifacts-root /tmp/vibemarket-os-r0-artifacts \
+  --waydroid-candidate r37
 ```
 
 Review the simulation and its evidence directory. Close camera applications,
@@ -107,9 +107,14 @@ Use the resulting stages with the simulation first:
 fixes=/tmp/vibemarket-os-r0-sources/oneplus6t-pmos-fixes
 ./scripts/vibe-install \
   --fixes-root "$fixes" \
-  --camera-stage /tmp/vibemarket-os-r0-artifacts/native-camera-stage \
-  --waydroid-stage /tmp/vibemarket-os-r0-artifacts/waydroid-camera-stage-r37
+  --artifacts-root /tmp/vibemarket-os-r0-artifacts \
+  --waydroid-candidate r37
 ```
+
+The artifact-root form automatically selects the verified native stage and,
+when `--waydroid-candidate r37` or `r38` is supplied, the corresponding
+verified Waydroid stage. Explicit `--camera-stage` and `--waydroid-stage`
+paths are still supported when reviewing a custom stage.
 
 The exact native bundle is the
 [camera-r7-r5 prerelease](https://github.com/lolren/oneplus6t-pmos-fixes/releases/tag/camera-r7-r5).

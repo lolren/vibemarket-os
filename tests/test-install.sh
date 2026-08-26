@@ -8,6 +8,11 @@ trap 'rm -rf "$TEST_DIR"' EXIT HUP INT TERM
 
 compatible_file=$TEST_DIR/compatible
 printf '%s\0' oneplus,fajita >"$compatible_file"
+health_command=$TEST_DIR/waydroid-health
+printf '%s\n' '#!/bin/sh' \
+	'printf "%s\\n" rootfs_mounts=0 overlay_precondition=pass stale_helper_count=0' \
+	>"$health_command"
+chmod +x "$health_command"
 
 fixes_root=$TEST_DIR/fixes
 mkdir -p "$fixes_root/scripts" "$fixes_root/data"
@@ -17,6 +22,11 @@ git -C "$fixes_root" config user.name test
 printf '%s\n' '#!/bin/sh' 'printf "%s\\n" manager_called=yes' \
 	'printf "%s\\n" result=pass' >"$fixes_root/scripts/manage-camera-generation"
 chmod +x "$fixes_root/scripts/manage-camera-generation"
+printf '%s\n' '#!/bin/sh' \
+	'if [ "$1" = --dry-run ]; then stage=$2; else stage=$1; fi' \
+	'printf "%s\\n" waydroid_stage=$stage' \
+	'printf "%s\\n" result=pass' >"$fixes_root/scripts/install-waydroid-camera"
+chmod +x "$fixes_root/scripts/install-waydroid-camera"
 touch "$fixes_root/data/camera-generation-r7-r5.psv"
 git -C "$fixes_root" add scripts data
 git -C "$fixes_root" commit --quiet -m initial
@@ -32,19 +42,29 @@ compatible|oneplus,fajita
 component|oneplus6t-pmos-fixes|https://github.com/lolren/oneplus6t-pmos-fixes.git|$revision|source-and-device-tools
 policy|camera-critical|manifest-generation-required
 EOF
-mkdir "$TEST_DIR/camera-stage"
+artifacts_root=$TEST_DIR/artifacts
+mkdir "$artifacts_root" "$artifacts_root/native-camera-stage" \
+	"$artifacts_root/waydroid-camera-stage-r38"
 
 common_env="VIBEMARKET_COMPATIBLE_FILE=$compatible_file VIBEMARKET_WAYDROID_HEALTH_COMMAND=missing-command"
 env $common_env "$INSTALL" --manifest "$manifest" \
-	--fixes-root "$fixes_root" --camera-stage "$TEST_DIR/camera-stage" \
+	--fixes-root "$fixes_root" --artifacts-root "$artifacts_root" \
 	--evidence "$TEST_DIR/evidence" >"$TEST_DIR/pass-report"
 grep -Fqx "fixes_revision=$revision" "$TEST_DIR/pass-report"
 grep -Fqx 'manager_called=yes' "$TEST_DIR/pass-report"
 grep -Fqx 'result=pass' "$TEST_DIR/pass-report"
 
+VIBEMARKET_COMPATIBLE_FILE="$compatible_file" \
+VIBEMARKET_WAYDROID_HEALTH_COMMAND="$health_command" \
+	"$INSTALL" --manifest "$manifest" --fixes-root "$fixes_root" \
+	--artifacts-root "$artifacts_root" --waydroid-candidate r38 \
+	--evidence "$TEST_DIR/waydroid-evidence" >"$TEST_DIR/waydroid-report"
+grep -Fqx "waydroid_stage=$artifacts_root/waydroid-camera-stage-r38" \
+	"$TEST_DIR/waydroid-report"
+
 printf '%s\n' dirty >>"$fixes_root/data/camera-generation-r7-r5.psv"
 if env $common_env "$INSTALL" --manifest "$manifest" \
-	--fixes-root "$fixes_root" --camera-stage "$TEST_DIR/camera-stage" \
+	--fixes-root "$fixes_root" --artifacts-root "$artifacts_root" \
 	--evidence "$TEST_DIR/dirty-evidence" >"$TEST_DIR/dirty-report" 2>&1; then
 	printf '%s\n' 'expected dirty fixes checkout to be rejected' >&2
 	exit 1
@@ -54,7 +74,7 @@ grep -Fq 'fixes checkout is dirty' "$TEST_DIR/dirty-report"
 git -C "$fixes_root" add data/camera-generation-r7-r5.psv
 git -C "$fixes_root" commit --quiet -m dirty
 if env $common_env "$INSTALL" --manifest "$manifest" \
-	--fixes-root "$fixes_root" --camera-stage "$TEST_DIR/camera-stage" \
+	--fixes-root "$fixes_root" --artifacts-root "$artifacts_root" \
 	--evidence "$TEST_DIR/mismatch-evidence" >"$TEST_DIR/mismatch-report" 2>&1; then
 	printf '%s\n' 'expected manifest revision mismatch to be rejected' >&2
 	exit 1
